@@ -8,6 +8,7 @@ type SessionType = {
   user: {
     name: string;
     image: string;
+    email: string;
   };
 };
 
@@ -80,10 +81,10 @@ const DropdownUser = ({ session }: { session: SessionType }) => {
 
             <span className="block">
               <span className="block font-medium text-dark dark:text-white">
-                Jhon Smith
+                {session?.user?.name}
               </span>
               <span className="block font-medium text-dark-5 dark:text-dark-6">
-                jonson@nextadmin.com
+                {session?.user?.email}
               </span>
             </span>
           </div>
