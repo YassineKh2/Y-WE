@@ -1,8 +1,12 @@
 import React from "react";
 
-const AlertError = () => {
+type AlertErrorProps = {
+  error?: string;
+};
+
+const AlertError: React.FC<AlertErrorProps> = ({ error }) => {
   return (
-    <>
+    <div className="fixed bottom-5 right-5 z-50">
       <div className="flex w-full rounded-[10px] border-l-6 border-red-light bg-red-light-5 px-7 py-8 dark:bg-[#1B1B24] dark:bg-opacity-30 md:p-9">
         <div className="mr-5 mt-[5px] flex h-8 w-full max-w-8 items-center justify-center rounded-md bg-red-light">
           <svg
@@ -21,16 +25,14 @@ const AlertError = () => {
         </div>
         <div className="w-full">
           <h5 className="mb-4 font-bold leading-[22px] text-[#BC1C21]">
-            There were 1 errors with your submission
+            There was an error with your submission
           </h5>
           <ul>
-            <li className="text-[#CD5D5D]">
-              Lorem Ipsum is simply dummy text of the printing
-            </li>
+            <li className="text-[#CD5D5D]">{error}</li>
           </ul>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 
