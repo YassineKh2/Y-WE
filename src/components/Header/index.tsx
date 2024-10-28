@@ -95,7 +95,7 @@ const Header = (props: {
           </ul>
 
           {/* <!-- User Area --> */}
-          {session && <DropdownUser session={session} />}
+          {session && <DropdownUser session={session as any} />}
           {/* <!-- User Area --> */}
         </div>
       </div>
