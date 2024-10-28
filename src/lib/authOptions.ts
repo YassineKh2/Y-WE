@@ -37,8 +37,11 @@ export const authOptions: NextAuthOptions = {
           throw new Error("Credentials does not match");
         }
 
-        let { email, name, image } = user.toObject();
+        let { email, name, image, _id } = user.toObject();
+        let id = _id.toString();
+
         return {
+          id: id,
           email: email,
           name: name,
           image: image,
@@ -52,6 +55,13 @@ export const authOptions: NextAuthOptions = {
         return { ...token, ...session.user };
       }
       return { ...token, ...user };
+    },
+    session: async ({ session, token }) => {
+      if (token) {
+        // @ts-ignore
+        session.user.id = token.id;
+      }
+      return session;
     },
   },
 };

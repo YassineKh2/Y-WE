@@ -1,10 +1,9 @@
-"use client";
-
-import SidebarItem from "@/components/Sidebar/SidebarItem";
-import React, { useState } from "react";
+import React from "react";
+import SettingItem from "@/components/Settings/SettingItem";
+import { usePathname } from "next/navigation";
 
 const Item = {
-  route: "/Settings/profile",
+  route: "/settings/profile",
   label: "Profile",
   icon: (
     <svg
@@ -31,7 +30,7 @@ const Item = {
   ),
 };
 const Item2 = {
-  route: "/Preferences",
+  route: "/settings/preferences",
   label: "Preferences",
   icon: (
     <svg
@@ -84,7 +83,7 @@ const Item2 = {
   ),
 };
 const Item3 = {
-  route: "/Settings/credentials",
+  route: "/settings/credentials",
   label: "Credentials",
   icon: (
     <svg
@@ -130,35 +129,22 @@ const Item3 = {
   ),
 };
 export function SettingsSidebar() {
-  const [pageName, setPageName] = useState("Settings");
+  const pathname = usePathname();
+
   return (
     <>
       <aside
         className={`left-0 top-0 
-           -order-1 flex w-72.5 flex-col self-start  overflow-y-hidden rounded-3xl border-r border-stroke bg-white duration-300 ease-linear dark:border-stroke-dark dark:bg-gray-dark lg:static lg:order-none lg:translate-x-0`}
+           -order-1 flex w-72.5 flex-col self-start  overflow-y-hidden rounded-3xl border-r border-stroke bg-white duration-300 ease-linear dark:border-stroke-dark dark:bg-gray-dark lg:static lg:translate-x-0 xl:order-none`}
       >
         <div className="no-scrollbar flex flex-col overflow-y-auto duration-300 ease-linear">
           <nav className="mt-1 px-4 lg:px-6">
-            <div>
-              <h3 className="mb-5 text-sm font-medium text-dark-4 dark:text-dark-6"></h3>
-              <ul className="mb-6 flex flex-col gap-2">
-                <SidebarItem
-                  item={Item}
-                  pageName={pageName}
-                  setPageName={setPageName}
-                />
-                <SidebarItem
-                  item={Item2}
-                  pageName={pageName}
-                  setPageName={setPageName}
-                />
-                <SidebarItem
-                  item={Item3}
-                  pageName={pageName}
-                  setPageName={setPageName}
-                />
-              </ul>
-            </div>
+            <h3 className="mb-5 text-sm font-medium text-dark-4 dark:text-dark-6"></h3>
+            <ul className="mb-6 flex flex-col gap-2">
+              <SettingItem item={Item} active={pathname === Item.route} />
+              <SettingItem item={Item2} active={pathname === Item2.route} />
+              <SettingItem item={Item3} active={pathname === Item3.route} />
+            </ul>
           </nav>
         </div>
       </aside>

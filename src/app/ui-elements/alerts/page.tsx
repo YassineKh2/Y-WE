@@ -18,9 +18,9 @@ const Alerts = () => {
 
       <div className="rounded-[10px] bg-white p-4 shadow-1 dark:bg-gray-dark dark:shadow-card md:p-6 xl:p-9">
         <div className="flex flex-col gap-7.5">
-          <AlertWarning />
-          <AlertSuccess />
-          <AlertError />
+          <AlertWarning message="test" />
+          <AlertSuccess message="test" />
+          <AlertError error="test" />
         </div>
       </div>
     </DefaultLayout>

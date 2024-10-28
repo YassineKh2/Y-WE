@@ -6,7 +6,7 @@ type AlertErrorProps = {
 
 const AlertError: React.FC<AlertErrorProps> = ({ error }) => {
   return (
-    <div className="fixed bottom-5 right-5 z-50">
+    <div className="fixed bottom-5 right-5 z-50  w-1/2 lg:w-1/4">
       <div className="flex w-full rounded-[10px] border-l-6 border-red-light bg-red-light-5 px-7 py-8 dark:bg-[#1B1B24] dark:bg-opacity-30 md:p-9">
         <div className="mr-5 mt-[5px] flex h-8 w-full max-w-8 items-center justify-center rounded-md bg-red-light">
           <svg
