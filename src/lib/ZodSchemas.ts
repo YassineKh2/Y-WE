@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z, ZodAny } from "zod";
 
 export const Register = z
   .object({
@@ -33,4 +33,16 @@ export const Credentials = z
   .refine((data) => !data.password || data.password.length >= 8, {
     message: "Password must be at least 8 characters",
     path: ["password"],
+  });
+
+export const Profile = z
+  .object({
+    name: z.string(),
+    phonenumber: z.string().length(8, { message: "Invalid Phone Number" }),
+    bio: z.string().optional(),
+    image: z.string().optional(),
+  })
+  .refine((data) => data.name.length >= 3 && data.name.length <= 30, {
+    message: "Invalid Name",
+    path: ["name"],
   });

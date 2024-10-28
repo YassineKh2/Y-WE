@@ -6,19 +6,16 @@ import "@/css/style.css";
 import React, { useEffect, useState } from "react";
 import Loader from "@/components/common/Loader";
 import SessionWrapper from "@/components/SessionWrapper";
+
+import { useSetLoading } from "@/stores/config-store";
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [loading, setLoading] = useState<boolean>(false);
-
-  // const pathname = usePathname();
-
-  // useEffect(() => {
-  //   setTimeout(() => setLoading(false), 1000);
-  // }, []);
+  const loading = useSetLoading((state) => state.loading);
 
   return (
     <SessionWrapper>

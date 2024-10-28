@@ -8,6 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import AlertError from "@/components/Alerts/AlertError";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { useSetLoading } from "@/stores/config-store";
 
 type FormFields = z.infer<typeof Login>;
 
@@ -19,6 +20,9 @@ export default function SigninWithPassword() {
     state: false,
     message: "",
   });
+  const setLoading = useSetLoading(
+    (state: { setLoading: any }) => state.setLoading,
+  );
 
   const {
     register,
@@ -30,6 +34,7 @@ export default function SigninWithPassword() {
 
   const router = useRouter();
   const onSubmit: SubmitHandler<FormFields> = async (data) => {
+    setLoading();
     const response = await signIn("credentials", {
       redirect: false,
       email: data.email,
@@ -38,6 +43,7 @@ export default function SigninWithPassword() {
 
     if (!response?.error) {
       router.push("/");
+      setLoading();
     }
     if (response?.error) {
       setErrorToast({
