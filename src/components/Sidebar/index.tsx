@@ -182,7 +182,7 @@ const menuGroups = [
         ),
         label: "Pages",
         route: "#",
-        children: [{ label: "Settings", route: "/pages/settings" }],
+        children: [{ label: "Settings", route: "/pages/Settings" }],
       },
     ],
   },

@@ -5,20 +5,9 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import AlertError from "@/components/Alerts/AlertError";
+import { Register } from "@/lib/ZodSchemas";
 
-const schema = z
-  .object({
-    name: z.string().min(3),
-    email: z.string().email(),
-    password: z.string().min(8),
-    retypepassword: z.string().min(8),
-  })
-  .refine((data) => data.password === data.retypepassword, {
-    message: "Passwords don't match",
-    path: ["retypepassword"],
-  });
-
-type FormFields = z.infer<typeof schema>;
+type FormFields = z.infer<typeof Register>;
 
 export const SignupWithPassword = () => {
   const [errorToast, setErrorToast] = useState({
@@ -31,11 +20,11 @@ export const SignupWithPassword = () => {
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<FormFields>({
-    resolver: zodResolver(schema),
+    resolver: zodResolver(Register),
   });
 
   const onSubmit: SubmitHandler<FormFields> = async (data) => {
-    const response = await fetch("/api/auth/register", {
+    const response = await fetch("api/auth/register", {
       method: "POST",
       body: JSON.stringify(data),
     });

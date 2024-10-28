@@ -5,13 +5,20 @@ import Breadcrumb from "@/components/Breadcrumbs/Breadcrumb";
 import { Metadata } from "next";
 import AuthLayout from "@/components/Layouts/AuthLayout";
 import Signin from "@/components/Auth/Signin";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/authOptions";
+import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {
   title: "Y-WE Login Page | Fund your events with ease",
   description: "This is the Y-WE Login Page ",
 };
 
-const SignIn: React.FC = () => {
+const SignIn: React.FC = async () => {
+  const session = await getServerSession(authOptions);
+  if (session) {
+    redirect("/");
+  }
   return (
     <AuthLayout>
       <div className="rounded-[10px] bg-white shadow-1 dark:bg-gray-dark dark:shadow-card">

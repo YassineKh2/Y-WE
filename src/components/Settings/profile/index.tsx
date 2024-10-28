@@ -1,8 +1,51 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import Image from "next/image";
+import AlertError from "@/components/Alerts/AlertError";
+import { SubmitHandler, useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Register } from "@/lib/ZodSchemas";
+import { z } from "zod";
+import { SettingsSidebar } from "@/components/Settings/SettingsSidebar";
+
+type FormFields = z.infer<typeof Register>;
 
 const SettingBoxes = () => {
+  const [errorToast, setErrorToast] = useState({
+    state: false,
+    message: "",
+  });
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<FormFields>({
+    resolver: zodResolver(Register),
+  });
+
+  const onSubmit: SubmitHandler<FormFields> = async (data) => {
+    const response = await fetch("api/auth/register", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+
+    const responseData = await response.json();
+
+    if (responseData.error) {
+      setErrorToast({
+        state: true,
+        message: responseData.error,
+      });
+      setTimeout(() => {
+        setErrorToast({
+          state: false,
+          message: "",
+        });
+      }, 5000);
+    }
+  };
+
   return (
     <>
       <div className="grid grid-cols-5 gap-8">
@@ -50,14 +93,18 @@ const SettingBoxes = () => {
                       <input
                         className="w-full rounded-[7px] border-[1.5px] border-stroke bg-white py-2.5 pl-12.5 pr-4.5 text-dark focus:border-primary focus-visible:outline-none dark:border-dark-3 dark:bg-dark-2 dark:text-white dark:focus:border-primary"
                         type="text"
-                        name="fullName"
-                        id="fullName"
+                        id="name"
+                        {...register("name")}
                         placeholder="Devid Jhon"
                         defaultValue="Devid Jhon"
                       />
+                      {errors.name && (
+                        <span className="mt-1 block text-xs text-red">
+                          {errors.name.message}
+                        </span>
+                      )}
                     </div>
                   </div>
-
                   <div className="w-full sm:w-1/2">
                     <label
                       className="mb-3 block text-body-sm font-medium text-dark dark:text-white"
@@ -87,48 +134,18 @@ const SettingBoxes = () => {
                       <input
                         className="w-full rounded-[7px] border-[1.5px] border-stroke bg-white py-2.5 pl-12.5 pr-4.5 text-dark focus:border-primary focus-visible:outline-none dark:border-dark-3 dark:bg-dark-2 dark:text-white dark:focus:border-primary"
                         type="text"
-                        name="phoneNumber"
-                        id="phoneNumber"
+                        {...register("phonenumber")}
+                        id="phonenumber"
                         placeholder="+990 3343 7865"
                         defaultValue="+990 3343 7865"
                       />
-                    </div>
-                  </div>
-                </div>
 
-                <div className="mb-5.5">
-                  <label
-                    className="mb-3 block text-body-sm font-medium text-dark dark:text-white"
-                    htmlFor="emailAddress"
-                  >
-                    Email Address
-                  </label>
-                  <div className="relative">
-                    <span className="absolute left-4.5 top-1/2 -translate-y-1/2">
-                      <svg
-                        className="fill-current"
-                        width="20"
-                        height="20"
-                        viewBox="0 0 20 20"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          clipRule="evenodd"
-                          d="M8.28567 2.7085H11.713C13.2445 2.70848 14.4575 2.70847 15.4069 2.83611C16.3839 2.96747 17.1747 3.24423 17.7983 3.86787C18.4219 4.4915 18.6987 5.28229 18.8301 6.25931C18.9577 7.20866 18.9577 8.42169 18.9577 9.95315V10.0472C18.9577 11.5786 18.9577 12.7917 18.8301 13.741C18.6987 14.718 18.4219 15.5088 17.7983 16.1325C17.1747 16.7561 16.3839 17.0329 15.4069 17.1642C14.4575 17.2919 13.2445 17.2918 11.713 17.2918H8.28567C6.75421 17.2918 5.54118 17.2919 4.59183 17.1642C3.61481 17.0329 2.82402 16.7561 2.20039 16.1325C1.57675 15.5088 1.29999 14.718 1.16863 13.741C1.04099 12.7917 1.041 11.5786 1.04102 10.0472V9.95315C1.041 8.42168 1.04099 7.20866 1.16863 6.25931C1.29999 5.28229 1.57675 4.4915 2.20039 3.86787C2.82402 3.24423 3.61481 2.96747 4.59183 2.83611C5.54118 2.70847 6.7542 2.70848 8.28567 2.7085ZM4.75839 4.07496C3.91998 4.18768 3.43694 4.39907 3.08427 4.75175C2.73159 5.10442 2.5202 5.58746 2.40748 6.42587C2.29234 7.28226 2.29102 8.41115 2.29102 10.0002C2.29102 11.5892 2.29234 12.7181 2.40748 13.5745C2.5202 14.4129 2.73159 14.8959 3.08427 15.2486C3.43694 15.6013 3.91998 15.8126 4.75839 15.9254C5.61478 16.0405 6.74367 16.0418 8.33268 16.0418H11.666C13.255 16.0418 14.3839 16.0405 15.2403 15.9254C16.0787 15.8126 16.5618 15.6013 16.9144 15.2486C17.2671 14.8959 17.4785 14.4129 17.5912 13.5745C17.7064 12.7181 17.7077 11.5892 17.7077 10.0002C17.7077 8.41115 17.7064 7.28226 17.5912 6.42587C17.4785 5.58746 17.2671 5.10442 16.9144 4.75175C16.5618 4.39907 16.0787 4.18768 15.2403 4.07496C14.3839 3.95982 13.255 3.9585 11.666 3.9585H8.33268C6.74367 3.9585 5.61478 3.95982 4.75839 4.07496ZM4.51921 6.26671C4.74019 6.00154 5.13429 5.96571 5.39946 6.18669L7.19854 7.68592C7.97601 8.33381 8.51579 8.78218 8.9715 9.07527C9.41263 9.35899 9.71179 9.45423 9.99935 9.45423C10.2869 9.45423 10.5861 9.35899 11.0272 9.07527C11.4829 8.78218 12.0227 8.33381 12.8002 7.68592L14.5992 6.18669C14.8644 5.96571 15.2585 6.00154 15.4795 6.26671C15.7005 6.53189 15.6646 6.92599 15.3995 7.14697L13.5691 8.67231C12.8304 9.28785 12.2318 9.78676 11.7034 10.1266C11.153 10.4806 10.6169 10.7042 9.99935 10.7042C9.38179 10.7042 8.84574 10.4806 8.29533 10.1266C7.76695 9.78677 7.16828 9.28786 6.42965 8.67232L4.59923 7.14697C4.33406 6.92599 4.29823 6.53189 4.51921 6.26671Z"
-                          fill=""
-                        />
-                      </svg>
-                    </span>
-                    <input
-                      className="w-full rounded-[7px] border-[1.5px] border-stroke bg-white py-2.5 pl-12.5 pr-4.5 text-dark focus:border-primary focus-visible:outline-none dark:border-dark-3 dark:bg-dark-2 dark:text-white dark:focus:border-primary"
-                      type="email"
-                      name="emailAddress"
-                      id="emailAddress"
-                      placeholder="devidjond45@gmail.com"
-                      defaultValue="devidjond45@gmail.com"
-                    />
+                      {errors.phonenumber && (
+                        <span className="mt-1 block text-xs text-red">
+                          {errors.phonenumber.message}
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
 
@@ -211,6 +228,88 @@ const SettingBoxes = () => {
                     ></textarea>
                   </div>
                 </div>
+                <label
+                  className="mb-3 block text-body-sm font-medium text-dark dark:text-white"
+                  htmlFor="bio"
+                >
+                  Your Image
+                </label>
+                <div className="mb-5 rounded-[10px] border border-stroke bg-white shadow-1 dark:border-dark-3 dark:bg-gray-dark dark:shadow-card">
+                  <div className="p-7">
+                    <form>
+                      <div className="mb-4 flex items-center gap-3">
+                        <div className="h-14 w-14 rounded-full">
+                          <>
+                            <Image
+                              src="/images/user/user-03.png"
+                              width={55}
+                              height={55}
+                              alt="User"
+                              className="overflow-hidden rounded-full"
+                            />
+                          </>
+                        </div>
+                        <div>
+                          <span className="mb-1.5 font-medium text-dark dark:text-white">
+                            Edit your photo
+                          </span>
+                          <span className="flex gap-3">
+                            <button className="text-body-sm hover:text-red">
+                              Delete
+                            </button>
+                            <button className="text-body-sm hover:text-primary">
+                              Update
+                            </button>
+                          </span>
+                        </div>
+                      </div>
+
+                      <div
+                        id="FileUpload"
+                        className="relative mb-5.5 block w-full cursor-pointer appearance-none rounded-xl border border-dashed border-gray-4 bg-gray-2 px-4 py-4 hover:border-primary dark:border-dark-3 dark:bg-dark-2 dark:hover:border-primary sm:py-7.5"
+                      >
+                        <input
+                          type="file"
+                          name="profilePhoto"
+                          id="profilePhoto"
+                          accept="image/png, image/jpg, image/jpeg"
+                          className="absolute inset-0 z-50 m-0 h-full w-full cursor-pointer p-0 opacity-0 outline-none"
+                        />
+                        <div className="flex flex-col items-center justify-center">
+                          <span className="flex h-13.5 w-13.5 items-center justify-center rounded-full border border-stroke bg-white dark:border-dark-3 dark:bg-gray-dark">
+                            <svg
+                              width="20"
+                              height="20"
+                              viewBox="0 0 20 20"
+                              fill="none"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                d="M10.4613 2.07827C10.3429 1.94876 10.1755 1.875 10 1.875C9.82453 1.875 9.65714 1.94876 9.53873 2.07827L6.2054 5.7241C5.97248 5.97885 5.99019 6.37419 6.24494 6.6071C6.49969 6.84002 6.89502 6.82232 7.12794 6.56756L9.375 4.10984V13.3333C9.375 13.6785 9.65482 13.9583 10 13.9583C10.3452 13.9583 10.625 13.6785 10.625 13.3333V4.10984L12.8721 6.56756C13.105 6.82232 13.5003 6.84002 13.7551 6.6071C14.0098 6.37419 14.0275 5.97885 13.7946 5.7241L10.4613 2.07827Z"
+                                fill="#5750F1"
+                              />
+                              <path
+                                d="M3.125 12.5C3.125 12.1548 2.84518 11.875 2.5 11.875C2.15482 11.875 1.875 12.1548 1.875 12.5V12.5457C1.87498 13.6854 1.87497 14.604 1.9721 15.3265C2.07295 16.0765 2.2887 16.7081 2.79029 17.2097C3.29189 17.7113 3.92345 17.9271 4.67354 18.0279C5.39602 18.125 6.31462 18.125 7.45428 18.125H12.5457C13.6854 18.125 14.604 18.125 15.3265 18.0279C16.0766 17.9271 16.7081 17.7113 17.2097 17.2097C17.7113 16.7081 17.9271 16.0765 18.0279 15.3265C18.125 14.604 18.125 13.6854 18.125 12.5457V12.5C18.125 12.1548 17.8452 11.875 17.5 11.875C17.1548 11.875 16.875 12.1548 16.875 12.5C16.875 13.6962 16.8737 14.5304 16.789 15.1599C16.7068 15.7714 16.5565 16.0952 16.3258 16.3258C16.0952 16.5565 15.7714 16.7068 15.1599 16.789C14.5304 16.8737 13.6962 16.875 12.5 16.875H7.5C6.30382 16.875 5.46956 16.8737 4.8401 16.789C4.22862 16.7068 3.90481 16.5565 3.67418 16.3258C3.44354 16.0952 3.29317 15.7714 3.21096 15.1599C3.12633 14.5304 3.125 13.6962 3.125 12.5Z"
+                                fill="#5750F1"
+                              />
+                            </svg>
+                          </span>
+                          <p className="mt-2.5 text-body-sm font-medium">
+                            <span className="text-primary">
+                              Click to upload
+                            </span>{" "}
+                            or drag and drop
+                          </p>
+                          <p className="mt-1 text-body-xs">
+                            SVG, PNG, JPG or GIF (max, 800 X 800px)
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex justify-end gap-3"></div>
+                    </form>
+                  </div>
+                </div>
 
                 <div className="flex justify-end gap-3">
                   <button
@@ -230,101 +329,10 @@ const SettingBoxes = () => {
             </div>
           </div>
         </div>
-        <div className="col-span-5 xl:col-span-2">
-          <div className="rounded-[10px] border border-stroke bg-white shadow-1 dark:border-dark-3 dark:bg-gray-dark dark:shadow-card">
-            <div className="border-b border-stroke px-7 py-4 dark:border-dark-3">
-              <h3 className="font-medium text-dark dark:text-white">
-                Your Photo
-              </h3>
-            </div>
-            <div className="p-7">
-              <form>
-                <div className="mb-4 flex items-center gap-3">
-                  <div className="h-14 w-14 rounded-full">
-                    <>
-                      <Image
-                        src="/images/user/user-03.png"
-                        width={55}
-                        height={55}
-                        alt="User"
-                        className="overflow-hidden rounded-full"
-                      />
-                    </>
-                  </div>
-                  <div>
-                    <span className="mb-1.5 font-medium text-dark dark:text-white">
-                      Edit your photo
-                    </span>
-                    <span className="flex gap-3">
-                      <button className="text-body-sm hover:text-red">
-                        Delete
-                      </button>
-                      <button className="text-body-sm hover:text-primary">
-                        Update
-                      </button>
-                    </span>
-                  </div>
-                </div>
-
-                <div
-                  id="FileUpload"
-                  className="relative mb-5.5 block w-full cursor-pointer appearance-none rounded-xl border border-dashed border-gray-4 bg-gray-2 px-4 py-4 hover:border-primary dark:border-dark-3 dark:bg-dark-2 dark:hover:border-primary sm:py-7.5"
-                >
-                  <input
-                    type="file"
-                    name="profilePhoto"
-                    id="profilePhoto"
-                    accept="image/png, image/jpg, image/jpeg"
-                    className="absolute inset-0 z-50 m-0 h-full w-full cursor-pointer p-0 opacity-0 outline-none"
-                  />
-                  <div className="flex flex-col items-center justify-center">
-                    <span className="flex h-13.5 w-13.5 items-center justify-center rounded-full border border-stroke bg-white dark:border-dark-3 dark:bg-gray-dark">
-                      <svg
-                        width="20"
-                        height="20"
-                        viewBox="0 0 20 20"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          d="M10.4613 2.07827C10.3429 1.94876 10.1755 1.875 10 1.875C9.82453 1.875 9.65714 1.94876 9.53873 2.07827L6.2054 5.7241C5.97248 5.97885 5.99019 6.37419 6.24494 6.6071C6.49969 6.84002 6.89502 6.82232 7.12794 6.56756L9.375 4.10984V13.3333C9.375 13.6785 9.65482 13.9583 10 13.9583C10.3452 13.9583 10.625 13.6785 10.625 13.3333V4.10984L12.8721 6.56756C13.105 6.82232 13.5003 6.84002 13.7551 6.6071C14.0098 6.37419 14.0275 5.97885 13.7946 5.7241L10.4613 2.07827Z"
-                          fill="#5750F1"
-                        />
-                        <path
-                          d="M3.125 12.5C3.125 12.1548 2.84518 11.875 2.5 11.875C2.15482 11.875 1.875 12.1548 1.875 12.5V12.5457C1.87498 13.6854 1.87497 14.604 1.9721 15.3265C2.07295 16.0765 2.2887 16.7081 2.79029 17.2097C3.29189 17.7113 3.92345 17.9271 4.67354 18.0279C5.39602 18.125 6.31462 18.125 7.45428 18.125H12.5457C13.6854 18.125 14.604 18.125 15.3265 18.0279C16.0766 17.9271 16.7081 17.7113 17.2097 17.2097C17.7113 16.7081 17.9271 16.0765 18.0279 15.3265C18.125 14.604 18.125 13.6854 18.125 12.5457V12.5C18.125 12.1548 17.8452 11.875 17.5 11.875C17.1548 11.875 16.875 12.1548 16.875 12.5C16.875 13.6962 16.8737 14.5304 16.789 15.1599C16.7068 15.7714 16.5565 16.0952 16.3258 16.3258C16.0952 16.5565 15.7714 16.7068 15.1599 16.789C14.5304 16.8737 13.6962 16.875 12.5 16.875H7.5C6.30382 16.875 5.46956 16.8737 4.8401 16.789C4.22862 16.7068 3.90481 16.5565 3.67418 16.3258C3.44354 16.0952 3.29317 15.7714 3.21096 15.1599C3.12633 14.5304 3.125 13.6962 3.125 12.5Z"
-                          fill="#5750F1"
-                        />
-                      </svg>
-                    </span>
-                    <p className="mt-2.5 text-body-sm font-medium">
-                      <span className="text-primary">Click to upload</span> or
-                      drag and drop
-                    </p>
-                    <p className="mt-1 text-body-xs">
-                      SVG, PNG, JPG or GIF (max, 800 X 800px)
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex justify-end gap-3">
-                  <button
-                    className="flex justify-center rounded-[7px] border border-stroke px-6 py-[7px] font-medium text-dark hover:shadow-1 dark:border-dark-3 dark:text-white"
-                    type="submit"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    className="flex items-center justify-center rounded-[7px] bg-primary px-6 py-[7px] font-medium text-gray-2 hover:bg-opacity-90"
-                    type="submit"
-                  >
-                    Save
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
+        <SettingsSidebar />
       </div>
+
+      {errorToast.state && <AlertError error={errorToast.message} />}
     </>
   );
 };

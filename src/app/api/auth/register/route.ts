@@ -1,9 +1,38 @@
 import { NextResponse } from "next/server";
-
+import User from "@/models/User";
+import connectMongoDB from "@/lib/MongodbClient";
+import { Register } from "@/lib/ZodSchemas";
 export async function POST(request: Request) {
   try {
-    const { name, email, password } = await request.json();
+    // Validating the data with Zod
+    const FormData = await request.json();
+    const submission = Register.safeParse(FormData);
+    if (!submission.success) {
+      return NextResponse.json(
+        { error: submission.error.flatten().fieldErrors },
+        { status: 400 },
+      );
+    }
+
+    const { name, email, password } = FormData;
+    const bcrypt = require("bcrypt");
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    await connectMongoDB();
+
+    await User.create({
+      name,
+      email,
+      password: hashedPassword,
+      image: "/images/user/default-user.png",
+    });
+
+    return NextResponse.json(
+      { success: "Account created successfully" },
+      { status: 202 },
+    );
   } catch (error: any) {
-    console.error(error.message);
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
