@@ -40,7 +40,7 @@ const SettingBoxes = () => {
     defaultValues: async () => {
       setLoading();
       const response = await fetch("/api/user/profile");
-      let data = await response.json();
+      let data = await response.json().then(() => setLoading());
       return data.user;
     },
   });
