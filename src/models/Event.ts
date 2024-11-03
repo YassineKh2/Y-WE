@@ -2,6 +2,12 @@ import mongoose from "mongoose";
 
 const { Schema } = mongoose;
 
+const STATE = {
+  PENDING: "PENDING",
+  ACCEPTED: "ACCEPTED",
+  REFUSED: "REFUSED",
+};
+
 const userSchema = new Schema(
   {
     name: {
@@ -35,6 +41,11 @@ const userSchema = new Schema(
     type: {
       type: String,
       required: true,
+    },
+    state: {
+      type: String,
+      enum: Object.values(STATE),
+      default: STATE.PENDING,
     },
     previousEvents: [
       {

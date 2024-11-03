@@ -46,3 +46,20 @@ export const Profile = z
     message: "Invalid Name",
     path: ["name"],
   });
+
+export const Event = z.object({
+  name: z.string().min(2, "Name is required"),
+  startDate: z.date(),
+  endDate: z.date(),
+  estimatedAttendees: z
+    .string()
+    .min(1, "You need at least 10 people")
+    .max(5, "Maximum is 99,999"),
+  askedAmount: z
+    .string()
+    .min(2, "Minimum required is above 10 د.ت")
+    .max(6, "Maximum allowed is bellow 999,999 د.ت"),
+  description: z.string().min(20).max(500),
+  location: z.string().min(4, "Full Location is required"),
+  type: z.string().min(3, "Type is required"),
+});
