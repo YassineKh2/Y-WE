@@ -8,6 +8,7 @@ import Loader from "@/components/common/Loader";
 import SessionWrapper from "@/components/SessionWrapper";
 
 import { useSetLoading } from "@/stores/config-store";
+import { NextUIProvider } from "@nextui-org/system";
 
 export default function RootLayout({
   children,
@@ -21,7 +22,7 @@ export default function RootLayout({
     <SessionWrapper>
       <html lang="en">
         <body suppressHydrationWarning={true}>
-          {loading ? <Loader /> : children}
+          <NextUIProvider>{loading ? <Loader /> : children}</NextUIProvider>
         </body>
       </html>
     </SessionWrapper>

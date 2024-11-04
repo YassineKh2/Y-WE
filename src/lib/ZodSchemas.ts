@@ -1,4 +1,4 @@
-import { z, ZodAny } from "zod";
+import { z } from "zod";
 
 export const Register = z
   .object({
@@ -47,10 +47,10 @@ export const Profile = z
     path: ["name"],
   });
 
-export const Event = z.object({
+export const AddEvent = z.object({
   name: z.string().min(2, "Name is required"),
-  startDate: z.date(),
-  endDate: z.date(),
+  startDate: z.date().optional(),
+  endDate: z.date().optional(),
   estimatedAttendees: z
     .string()
     .min(1, "You need at least 10 people")
@@ -59,7 +59,10 @@ export const Event = z.object({
     .string()
     .min(2, "Minimum required is above 10 د.ت")
     .max(6, "Maximum allowed is bellow 999,999 د.ت"),
-  description: z.string().min(20).max(500),
+  description: z
+    .string()
+    .min(20, "Minimum 20 characters ")
+    .max(500, "A maximum of 500 characters"),
   location: z.string().min(4, "Full Location is required"),
   type: z.string().min(3, "Type is required"),
 });

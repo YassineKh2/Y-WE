@@ -3,18 +3,26 @@ import React, { useState } from "react";
 import AlertError from "@/components/Alerts/AlertError";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Event } from "@/lib/ZodSchemas";
+import { AddEvent } from "@/lib/ZodSchemas";
 import { z } from "zod";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import AlertSuccess from "@/components/Alerts/AlertSuccess";
 import { DateRangePicker } from "@nextui-org/date-picker";
 import { Input, Textarea } from "@nextui-org/input";
-import { parseAbsoluteToLocal } from "@internationalized/date";
+import {
+  CalendarDate,
+  CalendarDateTime,
+  getLocalTimeZone,
+  parseAbsoluteToLocal,
+  today,
+} from "@internationalized/date";
+import { Spinner } from "@nextui-org/spinner";
+import { useRouter } from "next/navigation";
 
-type FormFields = z.infer<typeof Event>;
+type FormFields = z.infer<typeof AddEvent>;
 
-const AddEvent = () => {
+const AddEventForm = () => {
   const [errorToast, setErrorToast] = useState({
     state: false,
     message: "",
@@ -25,20 +33,18 @@ const AddEvent = () => {
   });
 
   const [date, setDate] = useState({
-    start: parseAbsoluteToLocal("2021-04-01T18:45:22Z"),
-    end: parseAbsoluteToLocal("2021-04-14T19:15:22Z"),
+    start: parseAbsoluteToLocal(new Date().toISOString()),
+    end: parseAbsoluteToLocal(new Date().toISOString()).add({ days: 8 }),
   });
 
-  const { data: session, update } = useSession();
+  const router = useRouter();
 
   const {
     register,
     handleSubmit,
-    getValues,
-    setValue,
-    formState: { errors, isSubmitting },
+    formState: { errors, isSubmitting, isSubmitted },
   } = useForm<FormFields>({
-    resolver: zodResolver(Event),
+    resolver: zodResolver(AddEvent),
   });
 
   function ErrorToast(error: any) {
@@ -67,22 +73,27 @@ const AddEvent = () => {
     }, 5000);
   }
 
-  const onSubmit: SubmitHandler<FormFields> = (data) => {
-    console.log("data");
-    // const response = await fetch("/api/user/credentials", {
-    //   method: "POST",
-    //   body: JSON.stringify(data),
-    // });
-    //
-    // const responseData = await response.json();
-    //
-    // if (!responseData.error) {
-    //   SuccessToast(responseData.success);
-    // }
-    //
-    // if (responseData.error) {
-    //   ErrorToast(responseData.error);
-    // }
+  const onSubmit: SubmitHandler<FormFields> = async (data) => {
+    data.startDate = date.start.toDate();
+    data.endDate = date.end.toDate();
+
+    console.log(data);
+
+    const response = await fetch("/api/events/add", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+
+    const responseData = await response.json();
+
+    if (!responseData.error) {
+      SuccessToast(responseData.success);
+      router.push("/events");
+    }
+
+    if (responseData.error) {
+      ErrorToast(responseData.error);
+    }
   };
 
   return (
@@ -142,15 +153,23 @@ const AddEvent = () => {
                   </div>
                   <div className="w-full sm:w-1/2">
                     <DateRangePicker
+                      minValue={today(getLocalTimeZone()).add({ days: 4 })}
                       granularity="hour"
                       label={"Duration"}
                       isRequired
                       variant="bordered"
                       labelPlacement="outside"
                       size={"lg"}
+                      hourCycle={24}
                       visibleMonths={2}
-                      value={date}
+                      value={undefined}
+                      //@ts-ignore
                       onChange={setDate}
+                      errorMessage={"Invalid Date"}
+                      isInvalid={
+                        isSubmitted &&
+                        date.start.toDate().getDay() === new Date().getDay()
+                      }
                     />
                   </div>
                 </div>
@@ -251,7 +270,7 @@ const AddEvent = () => {
                       placeholder="5000"
                       endContent={
                         <div className="pointer-events-none flex items-center">
-                          <span className="text-default-400 text-small">
+                          <span className="text-small text-default-400">
                             د.ت
                           </span>
                         </div>
@@ -414,16 +433,18 @@ const AddEvent = () => {
 
                 <div className="flex justify-end gap-3">
                   <Link
-                    href="/"
+                    href="/events"
                     className="flex justify-center rounded-[7px] border border-stroke px-6 py-[7px] font-medium text-dark hover:shadow-1 dark:border-dark-3 dark:text-white"
                   >
                     Cancel
                   </Link>
                   <button
-                    className="flex justify-center rounded-[7px] bg-primary px-6 py-[7px] font-medium text-gray-2 hover:bg-opacity-90"
+                    className="flex items-center justify-center gap-2 rounded-[7px] bg-primary px-6 py-[7px] font-medium text-gray-2 hover:bg-opacity-90"
                     type="submit"
+                    disabled={isSubmitting}
                   >
-                    Save
+                    {isSubmitting && <Spinner color="default" />}
+                    Submit
                   </button>
                 </div>
               </form>
@@ -438,4 +459,4 @@ const AddEvent = () => {
   );
 };
 
-export default AddEvent;
+export default AddEventForm;

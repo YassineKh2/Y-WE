@@ -8,8 +8,12 @@ const STATE = {
   REFUSED: "REFUSED",
 };
 
-const userSchema = new Schema(
+const eventSchema = new Schema(
   {
+    idOwner: {
+      type: String,
+      required: true,
+    },
     name: {
       type: String,
       required: true,
@@ -27,7 +31,7 @@ const userSchema = new Schema(
       required: true,
     },
     description: {
-      type: Number,
+      type: String,
       required: true,
     },
     askedAmount: {
@@ -47,31 +51,8 @@ const userSchema = new Schema(
       enum: Object.values(STATE),
       default: STATE.PENDING,
     },
-    previousEvents: [
-      {
-        name: {
-          type: String,
-          required: true,
-        },
-        Attendees: {
-          type: Number,
-          required: true,
-        },
-        description: {
-          type: String,
-          required: true,
-        },
-        location: {
-          type: String,
-          required: true,
-        },
-        link: {
-          type: String,
-        },
-      },
-    ],
   },
   { timestamps: true },
 );
 
-export default mongoose.models.user || mongoose.model("user", userSchema);
+export default mongoose.models.event || mongoose.model("event", eventSchema);

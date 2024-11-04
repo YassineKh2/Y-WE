@@ -7,7 +7,7 @@ const config: Config = {
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
-    "./node_modules/@nextui-org/theme/dist/components/(date-picker|input|button|ripple|spinner|calendar|date-input|popover).js",
+    "./node_modules/@nextui-org/theme/dist/components/(button|chip|date-picker|input|modal|spinner|table|popover|ripple|calendar|date-input|checkbox|spacer).js",
   ],
   darkMode: "class",
   theme: {
@@ -384,6 +384,32 @@ const config: Config = {
       },
     },
   },
-  plugins: [nextui()],
+
+  plugins: [
+    nextui({
+      themes: {
+        dark: {
+          colors: {
+            background: {
+              DEFAULT: "#161F30",
+            },
+            content1: {
+              DEFAULT: "#161F30",
+            },
+          },
+        },
+        light: {
+          colors: {
+            primary: {
+              DEFAULT: "#5750F1",
+            },
+            focus: {
+              DEFAULT: "#5750F1",
+            },
+          },
+        },
+      },
+    }),
+  ],
 };
 export default config;
