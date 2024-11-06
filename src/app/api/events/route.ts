@@ -15,7 +15,7 @@ export async function GET() {
     await connectMongoDB();
 
     let events = await Event.find({ idOwner: id }).select(
-      "name createdAt state",
+      "_id name createdAt state",
     );
     if (!events) {
       return NextResponse.json({ error: "Events not found" }, { status: 404 });

@@ -19,3 +19,12 @@ export function formatDateWithMinutes(dateString: string): string {
     timeZoneName: "short",
   });
 }
+
+export function capitalize(str: string) {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
+export function toCamelCase(str: string): string {
+  return str
+    .toLowerCase()
+    .replace(/[^a-zA-Z0-9]+(.)/g, (match, chr) => chr.toUpperCase());
+}

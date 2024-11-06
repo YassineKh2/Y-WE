@@ -19,6 +19,7 @@ import {
 } from "@internationalized/date";
 import { Spinner } from "@nextui-org/spinner";
 import { useRouter } from "next/navigation";
+import { Button } from "@nextui-org/button";
 
 type FormFields = z.infer<typeof AddEvent>;
 
@@ -432,20 +433,17 @@ const AddEventForm = () => {
                 </div>
 
                 <div className="flex justify-end gap-3">
-                  <Link
-                    href="/events"
-                    className="flex justify-center rounded-[7px] border border-stroke px-6 py-[7px] font-medium text-dark hover:shadow-1 dark:border-dark-3 dark:text-white"
+                  <Button
+                    onClick={() => {
+                      router.push("/events");
+                    }}
                   >
                     Cancel
-                  </Link>
-                  <button
-                    className="flex items-center justify-center gap-2 rounded-[7px] bg-primary px-6 py-[7px] font-medium text-gray-2 hover:bg-opacity-90"
-                    type="submit"
-                    disabled={isSubmitting}
-                  >
+                  </Button>
+                  <Button type="submit" color="primary" disabled={isSubmitting}>
                     {isSubmitting && <Spinner color="default" />}
                     Submit
-                  </button>
+                  </Button>
                 </div>
               </form>
             </div>
