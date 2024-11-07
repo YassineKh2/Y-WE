@@ -64,6 +64,21 @@ const columns = [
     sortable: true,
   },
   {
+    key: "askedAmount",
+    label: "ASKED AMOUNT ",
+    sortable: true,
+  },
+  {
+    key: "startDate",
+    label: "STARTS ON ",
+    sortable: true,
+  },
+  {
+    key: "endDate",
+    label: "ENDS ON",
+    sortable: true,
+  },
+  {
     key: "actions",
     label: "ACTIONS",
   },
@@ -85,6 +100,9 @@ type event = {
   createdAt: "";
   state: "";
   _id: "";
+  askedAmount: "";
+  startDate: "";
+  endDate: "";
   [key: string]: string;
 };
 
@@ -102,6 +120,9 @@ export function AllEvents() {
     createdAt: "",
     state: "",
     _id: "",
+    askedAmount: "",
+    startDate: "",
+    endDate: "",
   });
 
   // used to store the value of the input name field in the delete modal
@@ -179,6 +200,28 @@ export function AllEvents() {
     switch (columnKey) {
       case "name":
         return event.name;
+      case "startDate":
+        return (
+          <Tooltip
+            placement="top-start"
+            showArrow={true}
+            content={"At :" + formatDateWithMinutes(event.startDate)}
+          >
+            {formatDateWithDays(event.startDate)}
+          </Tooltip>
+        );
+      case "endDate":
+        return (
+          <Tooltip
+            placement="top-start"
+            showArrow={true}
+            content={"At :" + formatDateWithMinutes(event.endDate)}
+          >
+            {formatDateWithDays(event.endDate)}
+          </Tooltip>
+        );
+      case "askedAmount":
+        return event.askedAmount + " " + "د.ت";
       case "createdAt":
         return (
           <Tooltip
