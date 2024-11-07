@@ -5,6 +5,7 @@ import React from "react";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOptions";
 import { redirect } from "next/navigation";
+import { HomePage } from "@/components/Home/HomePage";
 
 export const metadata: Metadata = {
   title: "Y-WE | Fund your events with ease",
@@ -13,14 +14,17 @@ export const metadata: Metadata = {
 
 export default async function Home() {
   const session = await getServerSession(authOptions);
-  if (!session) {
-    redirect("/signin");
-  }
   return (
     <>
-      <DefaultLayout>
-        <ECommerce />
-      </DefaultLayout>
+      {session ? (
+        <DefaultLayout>
+          <div className="mx-auto w-full max-w-[1080px]">
+            <ECommerce />
+          </div>
+        </DefaultLayout>
+      ) : (
+        <HomePage />
+      )}
     </>
   );
 }

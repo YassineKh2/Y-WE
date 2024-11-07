@@ -8,8 +8,17 @@ export async function POST(request: Request) {
     const FormData = await request.json();
     const submission = Register.safeParse(FormData);
     if (!submission.success) {
+      console.log(submission.error.flatten().fieldErrors);
       return NextResponse.json(
         { error: submission.error.flatten().fieldErrors },
+        { status: 400 },
+      );
+    }
+
+    const existingUser = await User.findOne({ email: FormData.email });
+    if (existingUser) {
+      return NextResponse.json(
+        { error: "User already exists with this email" },
         { status: 400 },
       );
     }

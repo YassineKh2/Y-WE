@@ -1,4 +1,4 @@
-import { NextAuthOptions } from "next-auth";
+import { Account, User as AuthUser, NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
 import connectMongoDB from "@/lib/MongodbClient";
@@ -62,6 +62,46 @@ export const authOptions: NextAuthOptions = {
         session.user.id = token.id;
       }
       return session;
+    },
+
+    signIn: async ({
+      user,
+      account,
+    }: {
+      user: AuthUser;
+      account: Account | null;
+    }): Promise<boolean> => {
+      if (account?.provider === "credentials") {
+        return true;
+      }
+      if (account?.provider === "google") {
+        try {
+          await connectMongoDB();
+          const existingUser = await User.findOne({ email: user?.email });
+          if (!existingUser) {
+            let data = {
+              name: user.name,
+              email: user.email,
+              image: user.image,
+              password: "",
+            };
+            const randomPassword = require("crypto")
+              .randomBytes(16)
+              .toString("hex");
+            const bcrypt = require("bcrypt");
+            const hashedPassword = await bcrypt.hash(randomPassword, 10);
+            data = { ...data, password: hashedPassword };
+            await User.create(data);
+            return true;
+          }
+
+          return true;
+        } catch (error) {
+          console.log(error);
+          return false;
+        }
+      }
+      return true;
     },
   },
 };

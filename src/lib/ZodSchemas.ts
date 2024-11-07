@@ -6,7 +6,7 @@ export const Register = z
     email: z.string().email(),
     password: z.string().min(8),
     retypepassword: z.string().min(8),
-    phonenumber: z.number().min(8).max(8),
+    phonenumber: z.number().min(8).max(8).optional(),
     image: z.string().optional(),
     bio: z.string().optional(),
   })
