@@ -47,7 +47,11 @@ import { useRouter } from "next/navigation";
 import { Pagination } from "@nextui-org/pagination";
 import { Skeleton } from "@nextui-org/skeleton";
 import { User } from "@nextui-org/user";
-
+import { Image } from "@nextui-org/image";
+import { Card, CardBody, CardHeader } from "@nextui-org/card";
+import "../../../../public/flipimg.css";
+import { DateRangePicker } from "@nextui-org/date-picker";
+import { parseDate } from "@internationalized/date";
 const columns = [
   {
     key: "ownerName",
@@ -112,6 +116,10 @@ type event = {
   askedAmount: "";
   startDate: "";
   endDate: "";
+  type: "";
+  location: "";
+  estimatedAttendees: "";
+  description: "";
   [key: string]: string;
 };
 
@@ -120,7 +128,6 @@ const INITIAL_VISIBLE_COLUMNS = [
   "name",
   "createdAt",
   "state",
-  "askedAmount",
   "actions",
 ];
 
@@ -129,6 +136,7 @@ export function AllEvents() {
   const [events, setEvents] = useState<event[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const ShowEventModal = useDisclosure();
   // used to store the value of the active event in the delete modal
   const [activeEvent, setActiveEvent] = useState<event>({
     ownerName: "",
@@ -142,6 +150,10 @@ export function AllEvents() {
     askedAmount: "",
     startDate: "",
     endDate: "",
+    type: "",
+    location: "",
+    estimatedAttendees: "",
+    description: "",
   });
 
   // used to store the value of the input name field in the delete modal
@@ -275,24 +287,32 @@ export function AllEvents() {
         );
       case "actions":
         return (
-          <div className="relative flex items-center gap-2">
-            <Tooltip content="Details">
-              <span className="cursor-pointer text-lg text-default-400 active:opacity-50">
-                <EyeIcon />
-              </span>
-            </Tooltip>
-            <Tooltip color="danger" content="Delete event">
-              <span
-                onClick={() => {
-                  setActiveEvent(() => event);
-                  onOpen();
-                }}
-                className="cursor-pointer text-lg text-danger active:opacity-50"
-              >
-                <DeleteIcon />
-              </span>
-            </Tooltip>
-          </div>
+          <Button variant="light" disableRipple>
+            <div className="relative flex items-center gap-2">
+              <Tooltip content="Details">
+                <span
+                  onClick={() => {
+                    setActiveEvent(() => event);
+                    ShowEventModal.onOpen();
+                  }}
+                  className="cursor-pointer text-lg text-default-400 active:opacity-50"
+                >
+                  <EyeIcon />
+                </span>
+              </Tooltip>
+              <Tooltip color="danger" content="Delete event">
+                <span
+                  onClick={() => {
+                    setActiveEvent(() => event);
+                    onOpen();
+                  }}
+                  className="cursor-pointer text-lg text-danger active:opacity-50"
+                >
+                  <DeleteIcon />
+                </span>
+              </Tooltip>
+            </div>
+          </Button>
         );
       default:
         return cellValue;
@@ -659,6 +679,114 @@ export function AllEvents() {
                     </Button>
                     <Button color="danger" onPress={DeleteEvent}>
                       Delete
+                    </Button>
+                  </ModalFooter>
+                </>
+              )}
+            </ModalContent>
+          </Modal>
+
+          <Modal
+            backdrop="opaque"
+            shadow="lg"
+            isOpen={ShowEventModal.isOpen}
+            onOpenChange={ShowEventModal.onOpenChange}
+            classNames={{
+              backdrop: "z-999",
+              wrapper: "z-9999",
+            }}
+          >
+            <ModalContent>
+              {(onClose) => (
+                <>
+                  <ModalHeader className="mt-4 flex flex-row justify-between gap-1">
+                    Event Details
+                  </ModalHeader>
+                  <ModalBody>
+                    {/*<Card>*/}
+                    {/*  <CardHeader>*/}
+                    {/*    <div className="flex items-center gap-2">*/}
+                    {/*      <User*/}
+                    {/*        avatarProps={{*/}
+                    {/*          radius: "lg",*/}
+                    {/*          src: activeEvent?.ownerImage,*/}
+                    {/*        }}*/}
+                    {/*        description={activeEvent?.ownerEmail}*/}
+                    {/*        name={activeEvent?.ownerName}*/}
+                    {/*      >*/}
+                    {/*        {activeEvent?.ownerEmail}*/}
+                    {/*      </User>*/}
+                    {/*    </div>*/}
+                    {/*  </CardHeader>*/}
+                    {/*  <CardBody>*/}
+                    {/*    <div className="flex items-center gap-2">*/}
+                    {/*      <span className="text-default-400">Location:</span>*/}
+                    {/*      <span>{activeEvent?.location}</span>*/}
+                    {/*    </div>*/}
+                    {/*    <div className="flex items-center gap-2">*/}
+                    {/*      <span className="text-default-400">*/}
+                    {/*        Estimated Attendees:*/}
+                    {/*      </span>*/}
+                    {/*      <span>{activeEvent?.estimatedAttendees}</span>*/}
+                    {/*    </div>*/}
+                    {/*  </CardBody>*/}
+                    {/*</Card>*/}
+
+                    <div className="flip-container h-95">
+                      <div className="flipper  ">
+                        <div className="front">
+                          <div className="arrow">
+                            <svg
+                              className="fill-current"
+                              width="20"
+                              height="20"
+                              viewBox="0 0 16 16"
+                              fill="none"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
+                              <g
+                                id="SVGRepo_tracerCarrier"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              ></g>
+                              <g id="SVGRepo_iconCarrier">
+                                <path
+                                  d="M5 1H4L0 5L4 9H5V6H11C12.6569 6 14 7.34315 14 9C14 10.6569 12.6569 12 11 12H4V14H11C13.7614 14 16 11.7614 16 9C16 6.23858 13.7614 4 11 4H5V1Z"
+                                  fill="#d8d8dc"
+                                ></path>
+                              </g>
+                            </svg>
+                          </div>
+                          <Image
+                            width="100%"
+                            isBlurred
+                            src="https://nextui.org/images/album-cover.png"
+                            alt="NextUI Album Cover"
+                            className="m-5"
+                          />
+                        </div>
+                        <div className="back self-end">
+                          <p>{activeEvent?.description}</p>
+                          <div className="mt-5 flex gap-2 font-bold">
+                            <span>
+                              {formatDateWithDays(activeEvent?.startDate)}
+                            </span>
+                            <span className="text-default-400">To </span>
+                            <span>
+                              {formatDateWithDays(activeEvent?.endDate)}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <p>{activeEvent?.askedAmount}</p>
+                    <p>{activeEvent?.estimatedAttendees}</p>
+                    <p>{activeEvent?.createdAt}</p>
+                  </ModalBody>
+                  <ModalFooter>
+                    <Button color="primary" onPress={ShowEventModal.onClose}>
+                      Close
                     </Button>
                   </ModalFooter>
                 </>
