@@ -2,6 +2,12 @@ import mongoose from "mongoose";
 
 const { Schema } = mongoose;
 
+const ROLE = {
+  ADMIN: "ADMIN",
+  CLIENT: "CLIENT",
+  COMPANY: "COMPANY",
+};
+
 const userSchema = new Schema(
   {
     name: {
@@ -26,6 +32,7 @@ const userSchema = new Schema(
     bio: {
       type: String,
     },
+    role: { type: String, enum: Object.values(ROLE), default: ROLE.CLIENT },
   },
   { timestamps: true },
 );

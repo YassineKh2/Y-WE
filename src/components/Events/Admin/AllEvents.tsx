@@ -46,8 +46,14 @@ import {
 import { useRouter } from "next/navigation";
 import { Pagination } from "@nextui-org/pagination";
 import { Skeleton } from "@nextui-org/skeleton";
+import { User } from "@nextui-org/user";
 
 const columns = [
+  {
+    key: "ownerName",
+    label: "OWNER",
+    sortable: true,
+  },
   {
     key: "name",
     label: "NAME",
@@ -95,6 +101,9 @@ const stateOptions = [
 ];
 
 type event = {
+  ownerName: "";
+  ownerEmail: "";
+  ownerImage: "";
   key: "";
   name: "";
   createdAt: "";
@@ -106,7 +115,14 @@ type event = {
   [key: string]: string;
 };
 
-const INITIAL_VISIBLE_COLUMNS = ["name", "createdAt", "state", "actions"];
+const INITIAL_VISIBLE_COLUMNS = [
+  "ownerName",
+  "name",
+  "createdAt",
+  "state",
+  "askedAmount",
+  "actions",
+];
 
 export function AllEvents() {
   const router = useRouter();
@@ -115,6 +131,9 @@ export function AllEvents() {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   // used to store the value of the active event in the delete modal
   const [activeEvent, setActiveEvent] = useState<event>({
+    ownerName: "",
+    ownerEmail: "",
+    ownerImage: "",
     key: "",
     name: "",
     createdAt: "",
@@ -157,7 +176,7 @@ export function AllEvents() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch("/api/events");
+        const response = await fetch("/api/events/all");
         const data = await response.json();
         setEvents(data.events);
       } catch (error) {
@@ -198,6 +217,16 @@ export function AllEvents() {
     const cellValue = event[columnKey];
 
     switch (columnKey) {
+      case "ownerName":
+        return (
+          <User
+            avatarProps={{ radius: "lg", src: event.ownerImage }}
+            description={event.ownerEmail}
+            name={cellValue}
+          >
+            {event.ownerEmail}
+          </User>
+        );
       case "name":
         return event.name;
       case "startDate":
@@ -529,8 +558,10 @@ export function AllEvents() {
           <Table
             aria-label="Event Table"
             topContent={topContent}
+            selectedKeys={selectedKeys}
             topContentPlacement="outside"
             onSelectionChange={setSelectedKeys as any}
+            selectionMode="multiple"
             onSortChange={setSortDescriptor as any}
             sortDescriptor={sortDescriptor as any}
             bottomContent={bottomContent}
