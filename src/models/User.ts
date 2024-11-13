@@ -8,6 +8,12 @@ const ROLE = {
   COMPANY: "COMPANY",
 };
 
+const STATUS = {
+  ACTIVE: "ACTIVE",
+  BANNED: "BANNED",
+  SUSPENDED: "SUSPENDED",
+};
+
 const userSchema = new Schema(
   {
     name: {
@@ -33,6 +39,11 @@ const userSchema = new Schema(
       type: String,
     },
     role: { type: String, enum: Object.values(ROLE), default: ROLE.CLIENT },
+    status: {
+      type: String,
+      enum: Object.values(STATUS),
+      default: STATUS.ACTIVE,
+    },
   },
   { timestamps: true },
 );

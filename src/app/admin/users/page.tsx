@@ -1,5 +1,7 @@
 import { Metadata } from "next";
 import React from "react";
+import DefaultLayout from "@/components/Layouts/DefaultLaout";
+import { AllUsers } from "@/components/users/AllUsers";
 
 export const metadata: Metadata = {
   title: "Y-WE | Fund your events with ease",
@@ -9,7 +11,11 @@ export const metadata: Metadata = {
 export default async function Home() {
   return (
     <>
-      <h1>HI</h1>
+      <DefaultLayout>
+        <div className="mx-auto w-full max-w-[1080px]">
+          <AllUsers />
+        </div>
+      </DefaultLayout>
     </>
   );
 }

@@ -13,7 +13,6 @@ import { Chip } from "@nextui-org/chip";
 import { Tooltip } from "@nextui-org/tooltip";
 import {
   ChevronDownIcon,
-  DeleteIcon,
   EditIcon,
   EyeIcon,
   PlusFilledIcon,
@@ -47,45 +46,25 @@ import { useRouter } from "next/navigation";
 import { Pagination } from "@nextui-org/pagination";
 import { Skeleton } from "@nextui-org/skeleton";
 import { User } from "@nextui-org/user";
-import { Image } from "@nextui-org/image";
-import { Card, CardBody, CardHeader } from "@nextui-org/card";
-import "../../../../public/flipimg.css";
-import { DateRangePicker } from "@nextui-org/date-picker";
-import { parseDate } from "@internationalized/date";
 const columns = [
   {
-    key: "ownerName",
-    label: "OWNER",
+    key: "user",
+    label: "USER",
     sortable: true,
   },
   {
-    key: "name",
-    label: "NAME",
+    key: "phonenumber",
+    label: "PHONE NUMBER",
     sortable: true,
   },
   {
     key: "createdAt",
-    label: "SUBMITTED ON",
+    label: "JOINED ON",
     sortable: true,
   },
   {
-    key: "state",
-    label: "STATE",
-    sortable: true,
-  },
-  {
-    key: "askedAmount",
-    label: "ASKED AMOUNT ",
-    sortable: true,
-  },
-  {
-    key: "startDate",
-    label: "STARTS ON ",
-    sortable: true,
-  },
-  {
-    key: "endDate",
-    label: "ENDS ON",
+    key: "status",
+    label: "STATUS",
     sortable: true,
   },
   {
@@ -94,9 +73,9 @@ const columns = [
   },
 ];
 const stateColorMap = {
-  ACCEPTED: "success",
-  REFUSED: "danger",
-  PENDING: "warning",
+  ACTIVE: "success",
+  BANNED: "danger",
+  SUSPENDED: "warning",
 };
 const stateOptions = [
   { name: "Accepted", uid: "ACCEPTED" },
@@ -104,60 +83,36 @@ const stateOptions = [
   { name: "Pending", uid: "PENDING" },
 ];
 
-type event = {
-  ownerName: "";
-  ownerEmail: "";
-  ownerImage: "";
-  key: "";
+type user = {
   name: "";
+  image: "";
+  email: "";
+  phonenumber: "";
   createdAt: "";
-  state: "";
-  _id: "";
-  askedAmount: "";
-  startDate: "";
-  endDate: "";
-  type: "";
-  location: "";
-  estimatedAttendees: "";
-  description: "";
+  status: "";
   [key: string]: string;
 };
 
-const INITIAL_VISIBLE_COLUMNS = [
-  "ownerName",
-  "name",
-  "createdAt",
-  "state",
-  "actions",
-];
+const INITIAL_VISIBLE_COLUMNS = ["user", "phonenumber", "createdAt", "actions"];
 
-export function AllEvents() {
+export function AllUsers() {
   const router = useRouter();
-  const [events, setEvents] = useState<event[]>([]);
+  const [users, setUsers] = useState<user[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
-  const ShowEventModal = useDisclosure();
-  // used to store the value of the active event in the delete modal
-  const [activeEvent, setActiveEvent] = useState<event>({
-    ownerName: "",
-    ownerEmail: "",
-    ownerImage: "",
-    key: "",
+  const ShowUserModal = useDisclosure();
+  // used to store the value of the active user in the delete modal
+  const [activeUser, setActiveUser] = useState<user>({
     name: "",
+    image: "",
+    email: "",
+    phonenumber: "",
     createdAt: "",
-    state: "",
-    _id: "",
-    askedAmount: "",
-    startDate: "",
-    endDate: "",
-    type: "",
-    location: "",
-    estimatedAttendees: "",
-    description: "",
+    status: "",
   });
 
   // used to store the value of the input name field in the delete modal
-  const [confirmDelete, setConfirmDelete] = useState({
+  const [confirmDeactivate, setConfirmDeactivate] = useState({
     name: "",
     state: false,
   });
@@ -188,15 +143,15 @@ export function AllEvents() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch("/api/events/all");
+        const response = await fetch("/api/user");
         const data = await response.json();
-        setEvents(data.events);
+        setUsers(data.users);
       } catch (error) {
         console.error(error);
       }
     };
     fetchData().then(() => setIsLoaded(true));
-  }, [setEvents]);
+  }, [setUsers]);
 
   function ErrorToast(error: any) {
     setErrorToast({
@@ -224,61 +179,40 @@ export function AllEvents() {
     }, 5000);
   }
 
-  const renderCell = useCallback((event: event, columnKey: string) => {
+  const renderCell = useCallback((user: user, columnKey: string) => {
     // @ts-ignore
-    const cellValue = event[columnKey];
+    const cellValue = user[columnKey];
 
     switch (columnKey) {
-      case "ownerName":
+      case "user":
         return (
           <User
-            avatarProps={{ radius: "lg", src: event.ownerImage }}
-            description={event.ownerEmail}
-            name={cellValue}
-          >
-            {event.ownerEmail}
-          </User>
+            avatarProps={{ radius: "lg", src: user.image }}
+            name={user.name}
+            description={user.email}
+          />
         );
       case "name":
-        return event.name;
-      case "startDate":
-        return (
-          <Tooltip
-            placement="top-start"
-            showArrow={true}
-            content={"At :" + formatDateWithMinutes(event.startDate)}
-          >
-            {formatDateWithDays(event.startDate)}
-          </Tooltip>
-        );
-      case "endDate":
-        return (
-          <Tooltip
-            placement="top-start"
-            showArrow={true}
-            content={"At :" + formatDateWithMinutes(event.endDate)}
-          >
-            {formatDateWithDays(event.endDate)}
-          </Tooltip>
-        );
-      case "askedAmount":
-        return event.askedAmount + " " + "د.ت";
+        return user.name;
+
+      case "phonenumber":
+        return user.phonenumber;
       case "createdAt":
         return (
           <Tooltip
             placement="top-start"
             showArrow={true}
-            content={formatDateWithMinutes(event.createdAt)}
+            content={formatDateWithMinutes(user.createdAt)}
           >
-            {formatDateWithDays(event.createdAt)}
+            {formatDateWithDays(user.createdAt)}
           </Tooltip>
         );
-      case "state":
+      case "status":
         return (
           <Chip
             className="capitalize"
             // @ts-ignore
-            color={stateColorMap[event.state]}
+            color={stateColorMap[user.status]}
             size="sm"
             variant="flat"
           >
@@ -292,23 +226,58 @@ export function AllEvents() {
               <Tooltip content="Details">
                 <span
                   onClick={() => {
-                    setActiveEvent(() => event);
-                    ShowEventModal.onOpen();
+                    setActiveUser(() => user);
+                    ShowUserModal.onOpen();
                   }}
                   className="cursor-pointer text-lg text-default-400 active:opacity-50"
                 >
                   <EyeIcon />
                 </span>
               </Tooltip>
-              <Tooltip color="danger" content="Delete event">
+              <Tooltip color="danger" content="Deactivate user">
                 <span
                   onClick={() => {
-                    setActiveEvent(() => event);
+                    setActiveUser(() => user);
                     onOpen();
                   }}
                   className="cursor-pointer text-lg text-danger active:opacity-50"
                 >
-                  <DeleteIcon />
+                  <svg
+                    className="fill-current"
+                    viewBox="0 0 24 24"
+                    width="16"
+                    height="16"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                  >
+                    <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
+                    <g
+                      id="SVGRepo_tracerCarrier"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    ></g>
+                    <g id="SVGRepo_iconCarrier">
+                      <defs>
+                        <style>
+                          {`.cls-1{fill:none;stroke:#F31360;stroke-miterlimit:10;stroke-width:1.91px;}`}
+                        </style>
+                      </defs>
+                      <circle
+                        className="cls-1"
+                        cx="12"
+                        cy="12"
+                        r="10.5"
+                      ></circle>
+                      <path
+                        className="cls-1"
+                        d="M15.19,6.12,6.12,15.19A6.7,6.7,0,0,1,12,5.32,6.59,6.59,0,0,1,15.19,6.12Z"
+                      ></path>
+                      <path
+                        className="cls-1"
+                        d="M18.68,12A6.68,6.68,0,0,1,12,18.68a6.59,6.59,0,0,1-3.19-.8l9.07-9.07A6.59,6.59,0,0,1,18.68,12Z"
+                      ></path>
+                    </g>
+                  </svg>
                 </span>
               </Tooltip>
             </div>
@@ -319,13 +288,13 @@ export function AllEvents() {
     }
   }, []);
 
-  async function DeleteEvent() {
-    if (confirmDelete.name !== activeEvent?.name) {
-      setConfirmDelete({ ...confirmDelete, state: true });
+  async function DeactivateUser() {
+    if (confirmDeactivate.name !== activeUser?.name) {
+      setConfirmDeactivate({ ...confirmDeactivate, state: true });
       return;
     }
 
-    const response = await fetch("/api/events/" + activeEvent?._id, {
+    const response = await fetch("/api/users/" + activeUser?._id, {
       method: "DELETE",
     });
 
@@ -333,10 +302,8 @@ export function AllEvents() {
 
     if (!responseData.error) {
       SuccessToast(responseData.success);
-      setConfirmDelete({ name: "", state: false });
-      setEvents((prev) =>
-        prev.filter((event) => event._id !== activeEvent?._id),
-      );
+      setConfirmDeactivate({ name: "", state: false });
+      setUsers((prev) => prev.filter((user) => user._id !== activeUser?._id));
       onOpenChange();
     }
 
@@ -354,10 +321,10 @@ export function AllEvents() {
   }, []);
 
   const filteredItems = useMemo(() => {
-    let filteredEvents = [...events];
+    let filteredUsers = [...users];
 
     if (hasSearchFilter) {
-      filteredEvents = filteredEvents.filter((user) =>
+      filteredUsers = filteredUsers.filter((user) =>
         user.name.toLowerCase().includes(filterValue.toLowerCase()),
       );
     }
@@ -365,13 +332,13 @@ export function AllEvents() {
       statusFilter !== "all" &&
       Array.from(statusFilter).length !== stateOptions.length
     ) {
-      filteredEvents = filteredEvents.filter((event) =>
-        Array.from(statusFilter).includes(event.state),
+      filteredUsers = filteredUsers.filter((user) =>
+        Array.from(statusFilter).includes(user.state),
       );
     }
 
-    return filteredEvents;
-  }, [events, filterValue, statusFilter]);
+    return filteredUsers;
+  }, [users, filterValue, statusFilter]);
 
   const onRowsPerPageChange = useCallback(
     (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -492,7 +459,7 @@ export function AllEvents() {
             <Button
               color="primary"
               onClick={() => {
-                router.push("/events/add");
+                router.push("/users/add");
               }}
               endContent={<PlusFilledIcon />}
             >
@@ -502,7 +469,7 @@ export function AllEvents() {
         </div>
         <div className="flex items-center justify-between">
           <span className="text-small text-default-400">
-            Total {events.length} events
+            Total {users.length} users
           </span>
           <label className="flex items-center text-small text-default-400">
             Rows per page:
@@ -523,7 +490,7 @@ export function AllEvents() {
     statusFilter,
     visibleColumns,
     onRowsPerPageChange,
-    events.length,
+    users.length,
     onSearchChange,
     hasSearchFilter,
   ]);
@@ -576,7 +543,7 @@ export function AllEvents() {
       ) : (
         <>
           <Table
-            aria-label="Event Table"
+            aria-label="User Table"
             topContent={topContent}
             selectedKeys={selectedKeys}
             topContentPlacement="outside"
@@ -594,7 +561,7 @@ export function AllEvents() {
                 </TableColumn>
               )}
             </TableHeader>
-            <TableBody emptyContent={"No events found"} items={sortedItems}>
+            <TableBody emptyContent={"No users found"} items={sortedItems}>
               {(item) => (
                 <TableRow key={item.key}>
                   {(columnKey) => (
@@ -606,6 +573,7 @@ export function AllEvents() {
               )}
             </TableBody>
           </Table>
+
           <Modal
             backdrop="opaque"
             shadow="lg"
@@ -620,21 +588,24 @@ export function AllEvents() {
               {(onClose) => (
                 <>
                   <ModalHeader className="flex flex-col gap-1">
-                    DELETE EVENT
+                    DEACTIVATE ACCOUNT
                   </ModalHeader>
                   <ModalBody>
                     <p>
-                      Are you sure want to delete this event? This action cannot
+                      Are you sure want to delete this user? This action cannot
                       be undone !
                     </p>
                     <Input
-                      value={confirmDelete.name}
+                      value={confirmDeactivate.name}
                       onValueChange={(data) => {
-                        setConfirmDelete({ ...confirmDelete, name: data });
+                        setConfirmDeactivate({
+                          ...confirmDeactivate,
+                          name: data,
+                        });
                       }}
                       isInvalid={
-                        confirmDelete.state &&
-                        confirmDelete.name !== activeEvent?.name
+                        confirmDeactivate.state &&
+                        confirmDeactivate.name !== activeUser?.name
                       }
                       errorMessage="Names do not match"
                       isClearable
@@ -643,7 +614,7 @@ export function AllEvents() {
                           "placeholder:text-gray-400/80 dark:placeholder:text-white/20",
                       }}
                       type="name"
-                      label={"Type ' " + activeEvent?.name + " ' to confirm"}
+                      label={"Type ' " + activeUser?.name + " ' to confirm"}
                       labelPlacement="outside"
                       startContent={
                         <svg
@@ -669,7 +640,7 @@ export function AllEvents() {
                         </svg>
                       }
                       variant="bordered"
-                      placeholder={activeEvent?.name}
+                      placeholder={activeUser?.name}
                       size={"lg"}
                     />
                   </ModalBody>
@@ -677,8 +648,8 @@ export function AllEvents() {
                     <Button color="primary" variant="light" onPress={onClose}>
                       Close
                     </Button>
-                    <Button color="danger" onPress={DeleteEvent}>
-                      Delete
+                    <Button color="danger" onPress={DeactivateUser}>
+                      Deactivate
                     </Button>
                   </ModalFooter>
                 </>
@@ -689,8 +660,8 @@ export function AllEvents() {
           <Modal
             backdrop="opaque"
             shadow="lg"
-            isOpen={ShowEventModal.isOpen}
-            onOpenChange={ShowEventModal.onOpenChange}
+            isOpen={ShowUserModal.isOpen}
+            onOpenChange={ShowUserModal.onOpenChange}
             classNames={{
               backdrop: "z-999",
               wrapper: "z-9999",
@@ -700,92 +671,13 @@ export function AllEvents() {
               {(onClose) => (
                 <>
                   <ModalHeader className="mt-4 flex flex-row justify-between gap-1">
-                    Event Details
+                    User Details
                   </ModalHeader>
                   <ModalBody>
-                    {/*<Card>*/}
-                    {/*  <CardHeader>*/}
-                    {/*    <div className="flex items-center gap-2">*/}
-                    {/*      <User*/}
-                    {/*        avatarProps={{*/}
-                    {/*          radius: "lg",*/}
-                    {/*          src: activeEvent?.ownerImage,*/}
-                    {/*        }}*/}
-                    {/*        description={activeEvent?.ownerEmail}*/}
-                    {/*        name={activeEvent?.ownerName}*/}
-                    {/*      >*/}
-                    {/*        {activeEvent?.ownerEmail}*/}
-                    {/*      </User>*/}
-                    {/*    </div>*/}
-                    {/*  </CardHeader>*/}
-                    {/*  <CardBody>*/}
-                    {/*    <div className="flex items-center gap-2">*/}
-                    {/*      <span className="text-default-400">Location:</span>*/}
-                    {/*      <span>{activeEvent?.location}</span>*/}
-                    {/*    </div>*/}
-                    {/*    <div className="flex items-center gap-2">*/}
-                    {/*      <span className="text-default-400">*/}
-                    {/*        Estimated Attendees:*/}
-                    {/*      </span>*/}
-                    {/*      <span>{activeEvent?.estimatedAttendees}</span>*/}
-                    {/*    </div>*/}
-                    {/*  </CardBody>*/}
-                    {/*</Card>*/}
-
-                    <div className="flip-container h-95">
-                      <div className="flipper ">
-                        <div className="front">
-                          <div className="arrow">
-                            <svg
-                              className="fill-current"
-                              width="20"
-                              height="20"
-                              viewBox="0 0 16 16"
-                              fill="none"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
-                              <g
-                                id="SVGRepo_tracerCarrier"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              ></g>
-                              <g id="SVGRepo_iconCarrier">
-                                <path
-                                  d="M5 1H4L0 5L4 9H5V6H11C12.6569 6 14 7.34315 14 9C14 10.6569 12.6569 12 11 12H4V14H11C13.7614 14 16 11.7614 16 9C16 6.23858 13.7614 4 11 4H5V1Z"
-                                  fill="#d8d8dc"
-                                ></path>
-                              </g>
-                            </svg>
-                          </div>
-                          <Image
-                            width="100%"
-                            isBlurred
-                            src="https://nextui.org/images/album-cover.png"
-                            alt="NextUI Album Cover"
-                            className="m-5"
-                          />
-                        </div>
-                        <div className="back">
-                          <p>{activeEvent?.description}</p>
-                          <div className="mt-5 flex gap-2 font-bold">
-                            <span>
-                              {formatDateWithDays(activeEvent?.startDate)}
-                            </span>
-                            <span className="text-default-400">To </span>
-                            <span>
-                              {formatDateWithDays(activeEvent?.endDate)}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <p>{activeEvent?.askedAmount}</p>
-                    <p>{activeEvent?.estimatedAttendees}</p>
-                    <p>{activeEvent?.createdAt}</p>
+                    <h1>User Details</h1>
                   </ModalBody>
                   <ModalFooter>
-                    <Button color="primary" onPress={ShowEventModal.onClose}>
+                    <Button color="primary" onPress={ShowUserModal.onClose}>
                       Close
                     </Button>
                   </ModalFooter>
