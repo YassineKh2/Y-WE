@@ -46,6 +46,7 @@ import { useRouter } from "next/navigation";
 import { Pagination } from "@nextui-org/pagination";
 import { Skeleton } from "@nextui-org/skeleton";
 import { User } from "@nextui-org/user";
+import { PUT } from "@/app/api/user/[id]/route";
 const columns = [
   {
     key: "user",
@@ -89,7 +90,7 @@ type user = {
   email: "";
   phonenumber: "";
   createdAt: "";
-  status: "";
+  status: "ACTIVE" | "BANNED" | "SUSPENDED" | "";
   [key: string]: string;
 };
 
@@ -100,6 +101,7 @@ export function AllUsers() {
   const [users, setUsers] = useState<user[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const PardonUser = useDisclosure();
   const ShowUserModal = useDisclosure();
   // used to store the value of the active user in the delete modal
   const [activeUser, setActiveUser] = useState<user>({
@@ -112,7 +114,7 @@ export function AllUsers() {
   });
 
   // used to store the value of the input name field in the delete modal
-  const [confirmDeactivate, setConfirmDeactivate] = useState({
+  const [confirmBan, setConfirmBan] = useState({
     name: "",
     state: false,
   });
@@ -234,52 +236,89 @@ export function AllUsers() {
                   <EyeIcon />
                 </span>
               </Tooltip>
-              <Tooltip color="danger" content="Deactivate user">
-                <span
-                  onClick={() => {
-                    setActiveUser(() => user);
-                    onOpen();
-                  }}
-                  className="cursor-pointer text-lg text-danger active:opacity-50"
-                >
-                  <svg
-                    className="fill-current"
-                    viewBox="0 0 24 24"
-                    width="16"
-                    height="16"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
+              {user.status === "ACTIVE" ? (
+                <Tooltip color="danger" content="Ban user">
+                  <span
+                    onClick={() => {
+                      setActiveUser(() => user);
+                      onOpen();
+                    }}
+                    className="cursor-pointer text-lg text-danger active:opacity-50"
                   >
-                    <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
-                    <g
-                      id="SVGRepo_tracerCarrier"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    ></g>
-                    <g id="SVGRepo_iconCarrier">
-                      <defs>
-                        <style>
-                          {`.cls-1{fill:none;stroke:#F31360;stroke-miterlimit:10;stroke-width:1.91px;}`}
-                        </style>
-                      </defs>
-                      <circle
-                        className="cls-1"
-                        cx="12"
-                        cy="12"
-                        r="10.5"
-                      ></circle>
-                      <path
-                        className="cls-1"
-                        d="M15.19,6.12,6.12,15.19A6.7,6.7,0,0,1,12,5.32,6.59,6.59,0,0,1,15.19,6.12Z"
-                      ></path>
-                      <path
-                        className="cls-1"
-                        d="M18.68,12A6.68,6.68,0,0,1,12,18.68a6.59,6.59,0,0,1-3.19-.8l9.07-9.07A6.59,6.59,0,0,1,18.68,12Z"
-                      ></path>
-                    </g>
-                  </svg>
-                </span>
-              </Tooltip>
+                    <svg
+                      className="fill-current"
+                      viewBox="0 0 24 24"
+                      width="16"
+                      height="16"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                    >
+                      <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
+                      <g
+                        id="SVGRepo_tracerCarrier"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      ></g>
+                      <g id="SVGRepo_iconCarrier">
+                        <defs>
+                          <style>
+                            {`.cls-1{fill:none;stroke:#F31360;stroke-miterlimit:10;stroke-width:1.91px;}`}
+                          </style>
+                        </defs>
+                        <circle
+                          className="cls-1"
+                          cx="12"
+                          cy="12"
+                          r="10.5"
+                        ></circle>
+                        <path
+                          className="cls-1"
+                          d="M15.19,6.12,6.12,15.19A6.7,6.7,0,0,1,12,5.32,6.59,6.59,0,0,1,15.19,6.12Z"
+                        ></path>
+                        <path
+                          className="cls-1"
+                          d="M18.68,12A6.68,6.68,0,0,1,12,18.68a6.59,6.59,0,0,1-3.19-.8l9.07-9.07A6.59,6.59,0,0,1,18.68,12Z"
+                        ></path>
+                      </g>
+                    </svg>
+                  </span>
+                </Tooltip>
+              ) : (
+                <Tooltip color="success" content="Pardon user">
+                  <span
+                    onClick={() => {
+                      setActiveUser(() => user);
+                      PardonUser.onOpen();
+                    }}
+                    className="cursor-pointer text-lg text-danger active:opacity-50"
+                  >
+                    <svg
+                      className="fill-current"
+                      viewBox="0 0 24 24"
+                      width="20"
+                      height="20"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
+                      <g
+                        id="SVGRepo_tracerCarrier"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      ></g>
+                      <g id="SVGRepo_iconCarrier">
+                        {" "}
+                        <path
+                          fillRule="evenodd"
+                          clipRule="evenodd"
+                          d="M5.63604 18.364C9.15076 21.8787 14.8492 21.8787 18.364 18.364C21.8787 14.8492 21.8787 9.15076 18.364 5.63604C14.8492 2.12132 9.15076 2.12132 5.63604 5.63604C2.12132 9.15076 2.12132 14.8492 5.63604 18.364ZM7.80749 17.6067C10.5493 19.6623 14.4562 19.4433 16.9497 16.9497C19.4433 14.4562 19.6623 10.5493 17.6067 7.80749L14.8284 10.5858C14.4379 10.9763 13.8047 10.9763 13.4142 10.5858C13.0237 10.1953 13.0237 9.5621 13.4142 9.17157L16.1925 6.39327C13.4507 4.33767 9.54384 4.55666 7.05025 7.05025C4.55666 9.54384 4.33767 13.4507 6.39327 16.1925L9.17157 13.4142C9.5621 13.0237 10.1953 13.0237 10.5858 13.4142C10.9763 13.8047 10.9763 14.4379 10.5858 14.8284L7.80749 17.6067Z"
+                          fill="#16C964"
+                        ></path>{" "}
+                      </g>
+                    </svg>
+                  </span>
+                </Tooltip>
+              )}
             </div>
           </Button>
         );
@@ -288,22 +327,26 @@ export function AllUsers() {
     }
   }, []);
 
-  async function DeactivateUser() {
-    if (confirmDeactivate.name !== activeUser?.name) {
-      setConfirmDeactivate({ ...confirmDeactivate, state: true });
+  async function BanUser() {
+    if (confirmBan.name !== activeUser?.name) {
+      setConfirmBan({ ...confirmBan, state: true });
       return;
     }
 
-    const response = await fetch("/api/users/" + activeUser?._id, {
-      method: "DELETE",
+    const response = await fetch("/api/user/" + activeUser?._id, {
+      method: "PUT",
     });
 
     const responseData = await response.json();
 
     if (!responseData.error) {
       SuccessToast(responseData.success);
-      setConfirmDeactivate({ name: "", state: false });
-      setUsers((prev) => prev.filter((user) => user._id !== activeUser?._id));
+      setConfirmBan({ name: "", state: false });
+      setUsers((prevUsers) =>
+        prevUsers.map((user) =>
+          user._id === activeUser._id ? { ...user, status: "BANNED" } : user,
+        ),
+      );
       onOpenChange();
     }
 
@@ -311,6 +354,35 @@ export function AllUsers() {
       ErrorToast(responseData.error);
     }
   }
+
+  async function pardonUser() {
+    if (confirmBan.name !== activeUser?.name) {
+      setConfirmBan({ ...confirmBan, state: true });
+      return;
+    }
+
+    const response = await fetch("/api/user/" + activeUser?._id, {
+      method: "PUT",
+    });
+
+    const responseData = await response.json();
+
+    if (!responseData.error) {
+      SuccessToast(responseData.success);
+      setConfirmBan({ name: "", state: false });
+      setUsers((prevUsers) =>
+        prevUsers.map((user) =>
+          user._id === activeUser._id ? { ...user, status: "ACTIVE" } : user,
+        ),
+      );
+      PardonUser.onOpenChange();
+    }
+
+    if (responseData.error) {
+      ErrorToast(responseData.error);
+    }
+  }
+
   const onSearchChange = useCallback((value: string) => {
     if (value) {
       setFilterValue(value);
@@ -574,6 +646,7 @@ export function AllUsers() {
             </TableBody>
           </Table>
 
+          {/*Ban Modal*/}
           <Modal
             backdrop="opaque"
             shadow="lg"
@@ -588,24 +661,23 @@ export function AllUsers() {
               {(onClose) => (
                 <>
                   <ModalHeader className="flex flex-col gap-1">
-                    DEACTIVATE ACCOUNT
+                    BAN ACCOUNT
                   </ModalHeader>
                   <ModalBody>
                     <p>
-                      Are you sure want to delete this user? This action cannot
-                      be undone !
+                      Are you sure want to ban this user? This action cannot be
+                      undone !
                     </p>
                     <Input
-                      value={confirmDeactivate.name}
+                      value={confirmBan.name}
                       onValueChange={(data) => {
-                        setConfirmDeactivate({
-                          ...confirmDeactivate,
+                        setConfirmBan({
+                          ...confirmBan,
                           name: data,
                         });
                       }}
                       isInvalid={
-                        confirmDeactivate.state &&
-                        confirmDeactivate.name !== activeUser?.name
+                        confirmBan.state && confirmBan.name !== activeUser?.name
                       }
                       errorMessage="Names do not match"
                       isClearable
@@ -648,8 +720,8 @@ export function AllUsers() {
                     <Button color="primary" variant="light" onPress={onClose}>
                       Close
                     </Button>
-                    <Button color="danger" onPress={DeactivateUser}>
-                      Deactivate
+                    <Button color="danger" onPress={BanUser}>
+                      Ban
                     </Button>
                   </ModalFooter>
                 </>
@@ -657,6 +729,91 @@ export function AllUsers() {
             </ModalContent>
           </Modal>
 
+          {/*Pardon Modal*/}
+          <Modal
+            backdrop="opaque"
+            shadow="lg"
+            isOpen={PardonUser.isOpen}
+            onOpenChange={PardonUser.onOpenChange}
+            classNames={{
+              backdrop: "z-999",
+              wrapper: "z-9999",
+            }}
+          >
+            <ModalContent>
+              {(onClose) => (
+                <>
+                  <ModalHeader className="flex flex-col gap-1">
+                    PARDON ACCOUNT
+                  </ModalHeader>
+                  <ModalBody>
+                    <p>Are you sure want to pardon this user?</p>
+                    <Input
+                      value={confirmBan.name}
+                      onValueChange={(data) => {
+                        setConfirmBan({
+                          ...confirmBan,
+                          name: data,
+                        });
+                      }}
+                      isInvalid={
+                        confirmBan.state && confirmBan.name !== activeUser?.name
+                      }
+                      errorMessage="Names do not match"
+                      isClearable
+                      classNames={{
+                        input:
+                          "placeholder:text-gray-400/80 dark:placeholder:text-white/20",
+                      }}
+                      type="name"
+                      label={"Type ' " + activeUser?.name + " ' to confirm"}
+                      labelPlacement="outside"
+                      startContent={
+                        <svg
+                          className="mr-2 fill-current"
+                          width="18"
+                          height="18"
+                          viewBox="0 0 1024 1024"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
+                          <g
+                            id="SVGRepo_tracerCarrier"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          ></g>
+                          <g id="SVGRepo_iconCarrier">
+                            <path
+                              fillRule="evenodd"
+                              clipRule="evenodd"
+                              d="M676 862c-16 0-28-13-28-29V691c0-16 12-28 28-28h142c16 0 29 12 29 28v142c0 16-13 29-29 29H676zm142-171H676v142h142V691zM960 96c35 0 64 29 64 64v800c0 35-29 64-64 64H64c-35 0-64-29-64-64V160c0-35 29-64 64-64h256V32c0-18 14-32 32-32s32 14 32 32v64h256V32c0-18 14-32 32-32s32 14 32 32v64h256zM64 960h896V160H704v32c0 18-14 32-32 32s-32-14-32-32v-32H384v32c0 18-14 32-32 32s-32-14-32-32v-32H64v800z"
+                            ></path>
+                          </g>
+                        </svg>
+                      }
+                      variant="bordered"
+                      placeholder={activeUser?.name}
+                      size={"lg"}
+                    />
+                  </ModalBody>
+                  <ModalFooter>
+                    <Button color="primary" variant="light" onPress={onClose}>
+                      Close
+                    </Button>
+                    <Button
+                      color="success"
+                      onPress={pardonUser}
+                      className="text-white"
+                    >
+                      Pardon
+                    </Button>
+                  </ModalFooter>
+                </>
+              )}
+            </ModalContent>
+          </Modal>
+
+          {/*Details Modal*/}
           <Modal
             backdrop="opaque"
             shadow="lg"
