@@ -10,7 +10,6 @@ export async function GET() {
     if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-
     //@ts-ignore
     if (session?.user?.role !== "ADMIN") {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
@@ -18,10 +17,9 @@ export async function GET() {
 
     //@ts-ignore
     const id = session?.user?.id;
-
     await connectMongoDB();
 
-    let users = await User.find().select(
+    let users = await User.find({ ROLE: "COMPANY" }).select(
       "_id name phonenumber bio image email createdAt status",
     );
     if (!users) {

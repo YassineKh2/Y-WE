@@ -7,7 +7,7 @@ const config: Config = {
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
-    "./node_modules/@nextui-org/theme/dist/components/(button|card|chip|date-picker|dropdown|image|input|modal|pagination|skeleton|spinner|table|popover|user|ripple|calendar|date-input|menu|divider|checkbox|spacer|avatar).js",
+    "./node_modules/@nextui-org/theme/dist/components/(button|card|chip|date-picker|divider|dropdown|image|input|modal|pagination|select|skeleton|spinner|table|tabs|popover|user|ripple|calendar|date-input|menu|listbox|scroll-shadow|checkbox|spacer|avatar).js",
   ],
   darkMode: "class",
   theme: {

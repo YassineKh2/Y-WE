@@ -44,6 +44,10 @@ const userSchema = new Schema(
       enum: Object.values(STATUS),
       default: STATUS.ACTIVE,
     },
+    ban: {
+      reason: String,
+      duration: Date,
+    },
   },
   { timestamps: true },
 );

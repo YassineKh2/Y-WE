@@ -51,6 +51,10 @@ const eventSchema = new Schema(
       enum: Object.values(STATE),
       default: STATE.PENDING,
     },
+    affectedTo: {
+      type: String,
+      default: "",
+    },
   },
   { timestamps: true },
 );

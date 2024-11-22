@@ -5,14 +5,10 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AddEvent } from "@/lib/ZodSchemas";
 import { z } from "zod";
-import { useSession } from "next-auth/react";
-import Link from "next/link";
 import AlertSuccess from "@/components/Alerts/AlertSuccess";
 import { DateRangePicker } from "@nextui-org/date-picker";
 import { Input, Textarea } from "@nextui-org/input";
 import {
-  CalendarDate,
-  CalendarDateTime,
   getLocalTimeZone,
   parseAbsoluteToLocal,
   today,
@@ -20,17 +16,6 @@ import {
 import { Spinner } from "@nextui-org/spinner";
 import { useRouter } from "next/navigation";
 import { Button } from "@nextui-org/button";
-import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
-import "leaflet/dist/leaflet.css";
-import { Map } from "@/components/Maps/Map";
-import {
-  Modal,
-  ModalBody,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  useDisclosure,
-} from "@nextui-org/modal";
 
 type FormFields = z.infer<typeof AddEvent>;
 
@@ -50,9 +35,6 @@ const AddEventForm = () => {
   });
 
   const router = useRouter();
-
-  // Map Modal
-  const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
   const {
     register,
@@ -374,8 +356,6 @@ const AddEventForm = () => {
                       type="text"
                       label="Location"
                       isRequired
-                      onClick={() => onOpen()}
-                      readOnly
                       classNames={{
                         input:
                           "placeholder:text-gray-400/60 dark:placeholder:text-white/20",
@@ -408,7 +388,7 @@ const AddEventForm = () => {
                         </svg>
                       }
                       variant="bordered"
-                      placeholder="Hotel Laico"
+                      placeholder="Hammamet, Hotel Laico"
                       size={"lg"}
                     />
                   </div>
@@ -427,7 +407,7 @@ const AddEventForm = () => {
                     }}
                     isRequired
                     labelPlacement="outside"
-                    placeholder="Describe your event with detail ! "
+                    placeholder="My party will have multiple bands and ...."
                     startContent={
                       <svg
                         className="mr-2 fill-current"
@@ -466,38 +446,6 @@ const AddEventForm = () => {
           </div>
         </div>
       </div>
-
-      <Modal
-        backdrop="opaque"
-        isOpen={isOpen}
-        size={"xl"}
-        onOpenChange={onOpenChange}
-        classNames={{
-          backdrop: "z-999",
-          wrapper: "z-9999",
-        }}
-      >
-        <ModalContent>
-          {(onClose) => (
-            <>
-              <ModalHeader className="flex flex-col gap-1">
-                Modal Title
-              </ModalHeader>
-              <ModalBody>
-                <Map />
-              </ModalBody>
-              <ModalFooter>
-                <Button color="danger" variant="light" onPress={onClose}>
-                  Close
-                </Button>
-                <Button color="primary" onPress={onClose}>
-                  Submit
-                </Button>
-              </ModalFooter>
-            </>
-          )}
-        </ModalContent>
-      </Modal>
 
       {errorToast.state && <AlertError error={errorToast.message} />}
       {successToast.state && <AlertSuccess message={successToast.message} />}

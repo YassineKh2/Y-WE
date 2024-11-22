@@ -7,14 +7,12 @@ import {
   TableBody,
   TableRow,
   TableCell,
-  getKeyValue,
 } from "@nextui-org/table";
 import { Chip } from "@nextui-org/chip";
 import { Tooltip } from "@nextui-org/tooltip";
 import {
   ChevronDownIcon,
   DeleteIcon,
-  EditIcon,
   EyeIcon,
   PlusFilledIcon,
   SearchIcon,
@@ -47,11 +45,11 @@ import { useRouter } from "next/navigation";
 import { Pagination } from "@nextui-org/pagination";
 import { Skeleton } from "@nextui-org/skeleton";
 import { User } from "@nextui-org/user";
-import { Image } from "@nextui-org/image";
-import { Card, CardBody, CardHeader } from "@nextui-org/card";
 import "../../../../public/flipimg.css";
-import { DateRangePicker } from "@nextui-org/date-picker";
-import { parseDate } from "@internationalized/date";
+import { Divider } from "@nextui-org/divider";
+import { Avatar } from "@nextui-org/avatar";
+import { Select, SelectItem } from "@nextui-org/select";
+import { Tab, Tabs } from "@nextui-org/tabs";
 const columns = [
   {
     key: "ownerName",
@@ -134,6 +132,8 @@ const INITIAL_VISIBLE_COLUMNS = [
 export function AllEvents() {
   const router = useRouter();
   const [events, setEvents] = useState<event[]>([]);
+  const [companies, setCompanies] = useState<event[]>([]);
+
   const [isLoaded, setIsLoaded] = useState(false);
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const ShowEventModal = useDisclosure();
@@ -185,6 +185,7 @@ export function AllEvents() {
     message: "",
   });
 
+  // Get Events and Companies
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -194,9 +195,18 @@ export function AllEvents() {
       } catch (error) {
         console.error(error);
       }
+
+      try {
+        const response = await fetch("/api/user/company");
+        const data = await response.json();
+        setCompanies(data.users);
+      } catch (error) {
+        console.error(error);
+      }
     };
+
     fetchData().then(() => setIsLoaded(true));
-  }, [setEvents]);
+  }, [setEvents, setCompanies]);
 
   function ErrorToast(error: any) {
     setErrorToast({
@@ -695,94 +705,122 @@ export function AllEvents() {
               backdrop: "z-999",
               wrapper: "z-9999",
             }}
+            size={"3xl"}
           >
             <ModalContent>
               {(onClose) => (
                 <>
                   <ModalHeader className="mt-4 flex flex-row justify-between gap-1">
                     Event Details
+                    <Tabs
+                      variant="light"
+                      aria-label="Tabs"
+                      onSelectionChange={() => {
+                        console.log();
+                      }}
+                    >
+                      <Tab key="description" title="Description" />
+                      <Tab key="dateandlocation" title="Date And Location" />
+                      <Tab key="Details" title="Details" />
+                    </Tabs>
                   </ModalHeader>
                   <ModalBody>
-                    {/*<Card>*/}
-                    {/*  <CardHeader>*/}
-                    {/*    <div className="flex items-center gap-2">*/}
-                    {/*      <User*/}
-                    {/*        avatarProps={{*/}
-                    {/*          radius: "lg",*/}
-                    {/*          src: activeEvent?.ownerImage,*/}
-                    {/*        }}*/}
-                    {/*        description={activeEvent?.ownerEmail}*/}
-                    {/*        name={activeEvent?.ownerName}*/}
-                    {/*      >*/}
-                    {/*        {activeEvent?.ownerEmail}*/}
-                    {/*      </User>*/}
-                    {/*    </div>*/}
-                    {/*  </CardHeader>*/}
-                    {/*  <CardBody>*/}
-                    {/*    <div className="flex items-center gap-2">*/}
-                    {/*      <span className="text-default-400">Location:</span>*/}
-                    {/*      <span>{activeEvent?.location}</span>*/}
-                    {/*    </div>*/}
-                    {/*    <div className="flex items-center gap-2">*/}
-                    {/*      <span className="text-default-400">*/}
-                    {/*        Estimated Attendees:*/}
-                    {/*      </span>*/}
-                    {/*      <span>{activeEvent?.estimatedAttendees}</span>*/}
-                    {/*    </div>*/}
-                    {/*  </CardBody>*/}
-                    {/*</Card>*/}
-
-                    <div className="flip-container h-95">
-                      <div className="flipper ">
-                        <div className="front">
-                          <div className="arrow">
-                            <svg
-                              className="fill-current"
-                              width="20"
-                              height="20"
-                              viewBox="0 0 16 16"
-                              fill="none"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
-                              <g
-                                id="SVGRepo_tracerCarrier"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              ></g>
-                              <g id="SVGRepo_iconCarrier">
-                                <path
-                                  d="M5 1H4L0 5L4 9H5V6H11C12.6569 6 14 7.34315 14 9C14 10.6569 12.6569 12 11 12H4V14H11C13.7614 14 16 11.7614 16 9C16 6.23858 13.7614 4 11 4H5V1Z"
-                                  fill="#d8d8dc"
-                                ></path>
-                              </g>
-                            </svg>
-                          </div>
-                          <Image
-                            width="100%"
-                            isBlurred
-                            src="https://nextui.org/images/album-cover.png"
-                            alt="NextUI Album Cover"
-                            className="m-5"
-                          />
-                        </div>
-                        <div className="back">
-                          <p>{activeEvent?.description}</p>
-                          <div className="mt-5 flex gap-2 font-bold">
-                            <span>
-                              {formatDateWithDays(activeEvent?.startDate)}
-                            </span>
-                            <span className="text-default-400">To </span>
-                            <span>
-                              {formatDateWithDays(activeEvent?.endDate)}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
+                    <div className="flex items-start justify-between gap-2">
+                      <User
+                        avatarProps={{
+                          radius: "lg",
+                          src: activeEvent?.ownerImage,
+                        }}
+                        description={activeEvent?.ownerEmail}
+                        name={activeEvent?.ownerName}
+                      >
+                        {activeEvent?.ownerEmail}
+                      </User>
+                      <Chip
+                        className="capitalize"
+                        //@ts-ignore
+                        color={stateColorMap[activeEvent.state]}
+                        size="sm"
+                        variant="flat"
+                      >
+                        {activeEvent.state}
+                      </Chip>
                     </div>
-                    <p>{activeEvent?.askedAmount}</p>
-                    <p>{activeEvent?.estimatedAttendees}</p>
-                    <p>{activeEvent?.createdAt}</p>
+                    <p>{activeEvent?.description}</p>
+                    <Divider className="my-4" />
+                    <strong>Affected Company</strong>
+                    <Select
+                      aria-label="select"
+                      items={companies}
+                      labelPlacement="outside-left"
+                      className="max-w-xs"
+                      variant="bordered"
+                      listboxProps={{
+                        itemClasses: {
+                          base: [
+                            "rounded-md",
+                            "text-default-500",
+                            "transition-opacity",
+                            "data-[hover=true]:text-foreground",
+                            "data-[hover=true]:bg-default-100",
+                            "dark:data-[hover=true]:bg-default-50",
+                            "data-[selectable=true]:focus:bg-default-50",
+                            "data-[pressed=true]:opacity-70",
+                            "data-[focus-visible=true]:ring-default-500",
+                          ],
+                        },
+                      }}
+                      popoverProps={{
+                        classNames: {
+                          base: "before:bg-default-200",
+                          content:
+                            "p-0 border-small border-divider bg-background",
+                        },
+                      }}
+                      renderValue={(items) => {
+                        return items.map((item) => (
+                          <div
+                            key={item.key}
+                            className="flex items-center gap-2"
+                          >
+                            <Avatar
+                              alt={item.data?.name}
+                              className="flex-shrink-0"
+                              size="sm"
+                              src={item.data?.image}
+                            />
+                            <div className="flex flex-col">
+                              <span>{item.data?.name}</span>
+                            </div>
+                          </div>
+                        ));
+                      }}
+                    >
+                      {(user) => (
+                        <SelectItem key={user.id} textValue={user.name}>
+                          <div className="flex items-center gap-2">
+                            <Avatar
+                              alt={user.name}
+                              className="flex-shrink-0"
+                              size="sm"
+                              src={user.image}
+                            />
+                            <div className="flex flex-col">
+                              <span className="text-small">{user.name}</span>
+                              <span className="text-tiny text-default-400">
+                                {user.email}
+                              </span>
+                            </div>
+                          </div>
+                        </SelectItem>
+                      )}
+                    </Select>
+
+                    {/*<div className="mt-5 flex gap-2 font-bold">*/}
+                    {/*  <span>{formatDateWithDays(activeEvent?.startDate)}</span>*/}
+                    {/*  <span className="text-default-400">To </span>*/}
+                    {/*  <span>{formatDateWithDays(activeEvent?.endDate)}</span>*/}
+                    {/*</div>*/}
                   </ModalBody>
                   <ModalFooter>
                     <Button color="primary" onPress={ShowEventModal.onClose}>
